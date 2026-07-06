@@ -5,6 +5,7 @@
 ### Added
 
 - Documented current Hermes local patches from the VPS runtime.
+- Added fixtures for Notion task payload generation and validation cases.
 
 ### Changed
 
