@@ -37,3 +37,18 @@ Git repository -> reviewed commit -> tagged release -> deployed to VPS
 5. Restart Hermes only after validation.
 6. Verify Telegram health.
 7. Verify Notion write with dry-run or a test page.
+
+## Hermes Extension Install
+
+The first prepared install path is documented in
+`docs/07-hermes-extension-install.md`.
+
+Use:
+
+```bash
+deploy/scripts/install-hermes-extension.sh plan
+deploy/scripts/install-hermes-extension.sh verify
+deploy/scripts/install-hermes-extension.sh install --apply
+```
+
+The script does not restart Hermes and does not perform Notion writes.

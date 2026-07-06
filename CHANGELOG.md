@@ -8,6 +8,7 @@
 - Added fixtures for Notion task payload generation and validation cases.
 - Added pure Notion task payload builder with fixture-backed unit tests.
 - Added Hermes wrapper for `notion_task_create` with local unit tests.
+- Added documented install path and script for the Hermes extension bridge.
 
 ### Changed
 
