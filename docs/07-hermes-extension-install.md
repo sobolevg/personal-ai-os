@@ -165,3 +165,26 @@ one becomes available:
 
 Until then, this script keeps the remaining Hermes touchpoint small,
 documented, backed up, and generated from git.
+
+## Skill Routing Overlay
+
+The bridge makes `notion_task_create` available, but Hermes still needs routing
+instructions that prefer the native tool over generic Notion MCP page creation.
+
+The repo-owned skill overlay lives at:
+
+```text
+hermes/skills/productivity/notion-tasks/SKILL.md
+```
+
+Install it with:
+
+```bash
+cd /opt/personal-ai-os
+deploy/scripts/install-hermes-skill.sh plan
+deploy/scripts/install-hermes-skill.sh verify
+deploy/scripts/install-hermes-skill.sh install --apply
+```
+
+The skill install script backs up the existing skill directory and does not
+restart Hermes.

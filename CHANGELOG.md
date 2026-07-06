@@ -10,6 +10,8 @@
 - Added Hermes wrapper for `notion_task_create` with local unit tests.
 - Added documented install path and script for the Hermes extension bridge.
 - Added deployment log for the first VPS Hermes bridge rollout.
+- Added repo-owned Hermes `notion-tasks` skill routing overlay.
+- Added install script for Hermes skill overlays.
 
 ### Changed
 
