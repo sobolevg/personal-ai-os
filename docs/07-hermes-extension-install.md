@@ -30,7 +30,7 @@ Until Hermes exposes a cleaner plugin/autoload hook, the safe intermediate
 installation is:
 
 ```text
-/usr/local/lib/hermes-agent/tools/notion_task_tool.py
+/usr/local/lib/hermes-agent/tools/notion_task_create.py
   -> compatibility bridge that imports /opt/personal-ai-os/hermes/tools/notion_task_create.py
 ```
 
@@ -41,6 +41,7 @@ business logic. The business logic lives in git under `personal-ai-os`.
 
 The install script manages:
 
+- `/usr/local/lib/hermes-agent/tools/notion_task_create.py`
 - `/usr/local/lib/hermes-agent/tools/notion_task_tool.py`
 - `/usr/local/lib/hermes-agent/toolsets.py`
 
@@ -141,14 +142,16 @@ Manual rollback shape:
 
 ```bash
 cp /root/.hermes/backups/<timestamp>/notion_task_tool.py /usr/local/lib/hermes-agent/tools/notion_task_tool.py
+cp /root/.hermes/backups/<timestamp>/notion_task_create.py /usr/local/lib/hermes-agent/tools/notion_task_create.py
 cp /root/.hermes/backups/<timestamp>/toolsets.py /usr/local/lib/hermes-agent/toolsets.py
 systemctl restart hermes-gateway
 ```
 
-If the previous file did not exist, remove the bridge instead:
+If the previous files did not exist, remove the bridges instead:
 
 ```bash
 rm -f /usr/local/lib/hermes-agent/tools/notion_task_tool.py
+rm -f /usr/local/lib/hermes-agent/tools/notion_task_create.py
 cp /root/.hermes/backups/<timestamp>/toolsets.py /usr/local/lib/hermes-agent/toolsets.py
 systemctl restart hermes-gateway
 ```

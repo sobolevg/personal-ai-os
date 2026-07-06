@@ -7,7 +7,8 @@ HERMES_HOME="${HERMES_HOME:-/root/.hermes}"
 HERMES_PYTHON="${HERMES_PYTHON:-${HERMES_DIR}/venv/bin/python}"
 BACKUP_ROOT="${BACKUP_ROOT:-${HERMES_HOME}/backups}"
 
-TOOL_FILE="${HERMES_DIR}/tools/notion_task_tool.py"
+TOOL_FILE="${HERMES_DIR}/tools/notion_task_create.py"
+LEGACY_TOOL_FILE="${HERMES_DIR}/tools/notion_task_tool.py"
 TOOLSETS_FILE="${HERMES_DIR}/toolsets.py"
 
 usage() {
@@ -50,6 +51,14 @@ assert NOTION_TASK_CREATE_SCHEMA["name"] == "notion_task_create"
 assert "title" in NOTION_TASK_CREATE_SCHEMA["parameters"]["properties"]
 print("OK: OS-owned Hermes wrapper imports and exposes notion_task_create")
 PY
+
+  if [[ -f "$TOOL_FILE" ]]; then
+    if grep -q "registry.register(" "$TOOL_FILE"; then
+      echo "OK: Hermes canonical bridge contains discoverable registry.register call"
+    else
+      echo "WARN: Hermes canonical bridge lacks direct registry.register call; reinstall bridge before restart"
+    fi
+  fi
 }
 
 write_bridge() {
@@ -65,11 +74,42 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from tools.registry import registry
+
 OS_DIR = Path("${OS_DIR}")
 if str(OS_DIR) not in sys.path:
     sys.path.insert(0, str(OS_DIR))
 
 from hermes.tools.notion_task_create import (  # noqa: F401
+    NOTION_TASK_CREATE_SCHEMA,
+    load_notion_token,
+    notion_task_create,
+    post_notion_page,
+    register_tool,
+)
+
+registry.register(
+    name="notion_task_create",
+    toolset="notion_task",
+    schema=NOTION_TASK_CREATE_SCHEMA,
+    handler=lambda args, **kw: notion_task_create(
+        title=args.get("title", ""),
+        bucket=args.get("bucket", "Потом"),
+        comment=args.get("comment"),
+    ),
+    emoji="📝",
+)
+PY
+
+  cat > "$LEGACY_TOOL_FILE" <<PY
+"""Legacy compatibility bridge managed by personal-ai-os.
+
+The canonical Hermes module is tools.notion_task_create.
+"""
+
+from __future__ import annotations
+
+from tools.notion_task_create import (  # noqa: F401
     NOTION_TASK_CREATE_SCHEMA,
     load_notion_token,
     notion_task_create,
@@ -116,6 +156,7 @@ BACKUP_ROOT:     $BACKUP_ROOT
 
 Would manage:
   $TOOL_FILE
+  $LEGACY_TOOL_FILE
   $TOOLSETS_FILE
 
 Would not:
@@ -140,7 +181,12 @@ install_apply() {
   mkdir -p "$backup_dir"
 
   if [[ -e "$TOOL_FILE" ]]; then
-    cp "$TOOL_FILE" "$backup_dir/notion_task_tool.py"
+    cp "$TOOL_FILE" "$backup_dir/notion_task_create.py"
+  else
+    touch "$backup_dir/notion_task_create.py.absent"
+  fi
+  if [[ -e "$LEGACY_TOOL_FILE" ]]; then
+    cp "$LEGACY_TOOL_FILE" "$backup_dir/notion_task_tool.py"
   else
     touch "$backup_dir/notion_task_tool.py.absent"
   fi
@@ -164,10 +210,15 @@ Review, then restart manually if approved:
 
 Rollback:
   cp "$backup_dir/toolsets.py" "$TOOLSETS_FILE"
-  if [[ -f "$backup_dir/notion_task_tool.py" ]]; then
-    cp "$backup_dir/notion_task_tool.py" "$TOOL_FILE"
+  if [[ -f "$backup_dir/notion_task_create.py" ]]; then
+    cp "$backup_dir/notion_task_create.py" "$TOOL_FILE"
   else
     rm -f "$TOOL_FILE"
+  fi
+  if [[ -f "$backup_dir/notion_task_tool.py" ]]; then
+    cp "$backup_dir/notion_task_tool.py" "$LEGACY_TOOL_FILE"
+  else
+    rm -f "$LEGACY_TOOL_FILE"
   fi
   systemctl restart hermes-gateway
 DONE

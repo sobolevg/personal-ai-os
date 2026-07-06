@@ -18,6 +18,8 @@
 - Updated the draft task Notion contract to match current
   `notion_task_create` behavior.
 - Updated deployment docs to reflect the completed first Hermes bridge rollout.
+- Updated Hermes bridge installation to create the canonical
+  `tools/notion_task_create.py` module expected by Hermes discovery.
 
 ## v0.1.0-docs-baseline - 2026-07-06
 
