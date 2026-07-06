@@ -2,7 +2,7 @@
 
 ## 2026-07-06 - Hermes Notion Task Bridge
 
-Status: deployed and smoke-tested.
+Status: deployed and native-tool smoke-tested.
 
 Commit deployed:
 
@@ -48,12 +48,16 @@ Smoke test:
 - Telegram bot responded after restart.
 - Notion task creation flow completed from Telegram.
 - Test task title included `TEST personal-ai-os bridge`.
+- Direct native `notion_task_create` exposure confirmed after enabling the
+  `notion_task` toolset for Telegram platform config.
 
-Observed caveat:
+Resolved caveat:
 
-- The visible Telegram trace showed Notion MCP calls for task creation.
-- Native `notion_task_create` bridge import was verified by the install script.
-- A later trace should explicitly confirm direct `notion_task_create` tool usage.
+- Initial Telegram traces used Notion MCP or Python fallback because
+  `notion_task_create` was registered in Hermes runtime but not enabled in
+  Telegram's persisted `platform_toolsets.telegram` config.
+- The install script now defines the `notion_task` toolset and enables it for
+  Telegram, so new Telegram sessions can call `notion_task_create` directly.
 
 Rollback:
 
