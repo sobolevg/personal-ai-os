@@ -10,6 +10,7 @@ BACKUP_ROOT="${BACKUP_ROOT:-${HERMES_HOME}/backups}"
 TOOL_FILE="${HERMES_DIR}/tools/notion_task_create.py"
 LEGACY_TOOL_FILE="${HERMES_DIR}/tools/notion_task_tool.py"
 TOOLSETS_FILE="${HERMES_DIR}/toolsets.py"
+CONFIG_FILE="${HERMES_HOME}/config.yaml"
 
 usage() {
   cat <<'USAGE'
@@ -126,21 +127,66 @@ import sys
 
 path = Path(sys.argv[1])
 text = path.read_text(encoding="utf-8")
-if '"notion_task_create"' in text:
+
+changed = False
+
+if '"notion_task_create"' not in text:
+    needle = '    "web_search", "web_extract",\n'
+    insert = (
+        '    "web_search", "web_extract",\n'
+        '    # Evgenii personal Notion task capture, loaded from personal-ai-os bridge.\n'
+        '    "notion_task_create",\n'
+    )
+    if needle not in text:
+        raise SystemExit("Could not find insertion point in toolsets.py")
+    text = text.replace(needle, insert, 1)
+    changed = True
+    print("OK: added notion_task_create to _HERMES_CORE_TOOLS")
+else:
     print("OK: toolsets.py already lists notion_task_create")
-    raise SystemExit(0)
 
-needle = '    "web_search", "web_extract",\n'
-insert = (
-    '    "web_search", "web_extract",\n'
-    '    # Evgenii personal Notion task capture, loaded from personal-ai-os bridge.\n'
-    '    "notion_task_create",\n'
-)
-if needle not in text:
-    raise SystemExit("Could not find insertion point in toolsets.py")
+if '"notion_task"' not in text:
+    needle = '    # Scenario-specific toolsets\n'
+    insert = (
+        '    "notion_task": {\n'
+        '        "description": "Evgenii personal Notion task capture via native tool",\n'
+        '        "tools": ["notion_task_create"],\n'
+        '        "includes": [],\n'
+        '    },\n\n'
+        '    # Scenario-specific toolsets\n'
+    )
+    if needle not in text:
+        raise SystemExit("Could not find TOOLSETS insertion point in toolsets.py")
+    text = text.replace(needle, insert, 1)
+    changed = True
+    print("OK: added notion_task toolset")
+else:
+    print("OK: toolsets.py already defines notion_task toolset")
 
-path.write_text(text.replace(needle, insert, 1), encoding="utf-8")
-print("OK: added notion_task_create to toolsets.py")
+if changed:
+    path.write_text(text, encoding="utf-8")
+PY
+}
+
+ensure_telegram_toolset_enabled() {
+  HERMES_HOME="$HERMES_HOME" PYTHONPATH="$HERMES_DIR:${PYTHONPATH:-}" "$HERMES_PYTHON" - <<'PY'
+from hermes_cli.tools_config import load_config, save_config, _get_platform_tools
+
+config = load_config()
+platform_toolsets = config.setdefault("platform_toolsets", {})
+telegram = platform_toolsets.setdefault("telegram", [])
+if not isinstance(telegram, list):
+    telegram = []
+
+telegram = sorted({str(item) for item in telegram} | {"notion_task"})
+platform_toolsets["telegram"] = telegram
+save_config(config)
+
+effective = _get_platform_tools(config, "telegram")
+if "notion_task" not in effective:
+    raise SystemExit("notion_task was saved but is not effective for telegram")
+
+print("OK: platform_toolsets.telegram includes notion_task")
 PY
 }
 
@@ -158,12 +204,15 @@ Would manage:
   $TOOL_FILE
   $LEGACY_TOOL_FILE
   $TOOLSETS_FILE
+  $CONFIG_FILE
 
 Would not:
   restart hermes-gateway
   write to Notion
-  edit secrets
   edit systemd units
+
+Would update:
+  platform_toolsets.telegram += notion_task
 
 Run:
   deploy/scripts/install-hermes-extension.sh verify
@@ -191,9 +240,15 @@ install_apply() {
     touch "$backup_dir/notion_task_tool.py.absent"
   fi
   cp "$TOOLSETS_FILE" "$backup_dir/toolsets.py"
+  if [[ -e "$CONFIG_FILE" ]]; then
+    cp "$CONFIG_FILE" "$backup_dir/config.yaml"
+  else
+    touch "$backup_dir/config.yaml.absent"
+  fi
 
   write_bridge
   ensure_toolset_entry
+  ensure_telegram_toolset_enabled
   verify_wrapper
 
   cat <<DONE
@@ -210,6 +265,11 @@ Review, then restart manually if approved:
 
 Rollback:
   cp "$backup_dir/toolsets.py" "$TOOLSETS_FILE"
+  if [[ -f "$backup_dir/config.yaml" ]]; then
+    cp "$backup_dir/config.yaml" "$CONFIG_FILE"
+  else
+    rm -f "$CONFIG_FILE"
+  fi
   if [[ -f "$backup_dir/notion_task_create.py" ]]; then
     cp "$backup_dir/notion_task_create.py" "$TOOL_FILE"
   else

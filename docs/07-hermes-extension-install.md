@@ -44,15 +44,21 @@ The install script manages:
 - `/usr/local/lib/hermes-agent/tools/notion_task_create.py`
 - `/usr/local/lib/hermes-agent/tools/notion_task_tool.py`
 - `/usr/local/lib/hermes-agent/toolsets.py`
+- `/root/.hermes/config.yaml`
 
 It backs up existing files before changing them.
 
 It does not change:
 
 - `/root/.hermes/.env`
-- `/root/.hermes/config.yaml`
 - systemd unit files
 - Notion data
+
+It only changes `config.yaml` to ensure:
+
+```text
+platform_toolsets.telegram includes notion_task
+```
 
 It does not restart:
 
@@ -107,7 +113,9 @@ The script:
 2. backs up current Hermes files
 3. writes the compatibility bridge
 4. ensures `toolsets.py` lists `notion_task_create`
-5. verifies the OS-owned wrapper import
+5. ensures `toolsets.py` defines the `notion_task` toolset
+6. ensures Telegram platform config enables `notion_task`
+7. verifies the OS-owned wrapper import
 
 It does not restart Hermes.
 
@@ -144,6 +152,7 @@ Manual rollback shape:
 cp /root/.hermes/backups/<timestamp>/notion_task_tool.py /usr/local/lib/hermes-agent/tools/notion_task_tool.py
 cp /root/.hermes/backups/<timestamp>/notion_task_create.py /usr/local/lib/hermes-agent/tools/notion_task_create.py
 cp /root/.hermes/backups/<timestamp>/toolsets.py /usr/local/lib/hermes-agent/toolsets.py
+cp /root/.hermes/backups/<timestamp>/config.yaml /root/.hermes/config.yaml
 systemctl restart hermes-gateway
 ```
 
@@ -153,6 +162,7 @@ If the previous files did not exist, remove the bridges instead:
 rm -f /usr/local/lib/hermes-agent/tools/notion_task_tool.py
 rm -f /usr/local/lib/hermes-agent/tools/notion_task_create.py
 cp /root/.hermes/backups/<timestamp>/toolsets.py /usr/local/lib/hermes-agent/toolsets.py
+rm -f /root/.hermes/config.yaml
 systemctl restart hermes-gateway
 ```
 
