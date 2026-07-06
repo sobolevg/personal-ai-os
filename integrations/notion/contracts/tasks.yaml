@@ -1,0 +1,24 @@
+name: tasks
+status: draft
+notion:
+  database_name: "Мои задачи"
+  database_id: "176a0a22-1593-8122-94e7-cdb420698046"
+  data_source_id: "176a0a22-1593-81e7-94dd-000ba2c24933"
+properties:
+  title:
+    notion_property: "Name"
+    required: true
+  bucket:
+    notion_property: "Когда начать"
+    required: true
+    allowed_values:
+      - "Сегодня"
+      - "На неделе"
+      - "Потом"
+      - "На выходных"
+safe_operations:
+  create: true
+  update: confirmation_required
+  delete: false
+notes:
+  - "Initial draft mirrors current notion_task_create assumptions."

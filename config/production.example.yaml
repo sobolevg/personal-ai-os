@@ -1,0 +1,12 @@
+environment: production
+log_level: info
+
+notion:
+  contracts_path: /opt/personal-ai-os/integrations/notion/contracts
+
+hermes:
+  extension_path: /opt/personal-ai-os/hermes
+
+events:
+  store: sqlite
+  path: /var/lib/personal-ai-os/events.sqlite

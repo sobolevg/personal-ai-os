@@ -1,0 +1,650 @@
+# Personal AI OS — Detailed Next Steps Plan
+
+Date: 2026-07-06  
+Status: Planning document. No implementation executed.
+
+## 1. Guiding Decision
+
+All code, configuration templates, prompts, agent definitions, automation definitions, and deployment scripts must live in git.
+
+Nothing should be edited directly on the VPS as a permanent solution. The VPS should eventually become a deployment target, not the source of truth.
+
+The source of truth for code should be:
+
+```text
+Git repository -> reviewed commit -> tagged release -> deployed to VPS
+```
+
+The source of truth for personal data remains:
+
+```text
+Notion
+```
+
+Hermes remains:
+
+```text
+Messaging/runtime/tool gateway
+```
+
+Personal AI OS becomes:
+
+```text
+Domain layer: agents, automations, integrations, prompts, Notion contracts
+```
+
+## 2. Repository Strategy
+
+### 2.1 Primary Repository
+
+Create one private GitHub repository:
+
+```text
+personal-ai-os
+```
+
+Purpose:
+
+- Store all OS architecture docs.
+- Store all agent definitions.
+- Store automation definitions.
+- Store prompt library.
+- Store Notion schema contracts.
+- Store Hermes plugin/native tools.
+- Store deployment scripts.
+- Store tests.
+
+Why one repo first:
+
+- Easier rollback.
+- Easier search.
+- Easier architecture control.
+- Less overhead while the system is small.
+
+Split into multiple repos only when boundaries become real.
+
+### 2.2 Future Repositories
+
+Only later, if needed:
+
+```text
+personal-ai-os-infra
+personal-ai-os-hermes-plugin
+personal-ai-os-evals
+```
+
+Do not start with many repos. The first goal is controlled iteration, not enterprise theatre.
+
+## 3. Initial Repo Structure
+
+Recommended starting structure:
+
+```text
+personal-ai-os/
+├── README.md
+├── docs/
+│   ├── 00-hermes-audit.md
+│   ├── 01-architecture.md
+│   ├── 02-implementation-roadmap.md
+│   ├── 03-notion-contracts.md
+│   ├── 04-deployment.md
+│   └── 05-operations.md
+├── agents/
+│   ├── inbox_processor.yaml
+│   ├── task_planner.yaml
+│   ├── knowledge_curator.yaml
+│   ├── resource_importer.yaml
+│   ├── weekly_review.yaml
+│   ├── research_agent.yaml
+│   ├── project_manager.yaml
+│   └── personal_assistant.yaml
+├── automations/
+│   ├── telegram_to_inbox.yaml
+│   ├── voice_notes.yaml
+│   ├── daily_planning.yaml
+│   ├── weekly_review.yaml
+│   ├── project_creation.yaml
+│   ├── task_breakdown.yaml
+│   ├── resource_classification.yaml
+│   ├── movie_import.yaml
+│   └── book_import.yaml
+├── prompts/
+│   ├── system/
+│   ├── agents/
+│   ├── automations/
+│   └── shared/
+├── integrations/
+│   ├── notion/
+│   ├── telegram/
+│   ├── google_drive/
+│   ├── github/
+│   ├── search/
+│   ├── vision/
+│   └── ocr/
+├── hermes/
+│   ├── skills/
+│   ├── tools/
+│   └── toolsets/
+├── config/
+│   ├── default.yaml
+│   ├── production.example.yaml
+│   └── secrets.example.env
+├── deploy/
+│   ├── systemd/
+│   ├── scripts/
+│   └── backup/
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── fixtures/
+└── CHANGELOG.md
+```
+
+## 4. Git Workflow
+
+### 4.1 Branches
+
+Use a simple workflow:
+
+```text
+main
+feature/<short-name>
+fix/<short-name>
+release/<version>
+```
+
+Rules:
+
+- `main` is always deployable.
+- No direct experimental edits on VPS.
+- Every implemented feature gets a branch.
+- Every branch gets a small test or manual verification note.
+- Merge only after the rollback path is obvious.
+
+### 4.2 Commits
+
+Commit style:
+
+```text
+docs: add phase 1 architecture
+feat: add notion task capture integration
+feat: add telegram to inbox automation
+fix: handle notion schema mismatch
+chore: add systemd deployment template
+test: add task mapper fixtures
+```
+
+### 4.3 Tags
+
+Use version tags for deployable checkpoints:
+
+```text
+v0.1.0-docs-baseline
+v0.2.0-task-capture
+v0.3.0-telegram-inbox
+v0.4.0-daily-weekly-review
+```
+
+Rollback rule:
+
+```text
+If deployment breaks, checkout previous tag and restart service.
+```
+
+### 4.4 Changelog
+
+Every deployed version must update `CHANGELOG.md`:
+
+- Added
+- Changed
+- Fixed
+- Deployment notes
+- Rollback notes
+
+## 5. Deployment Model
+
+### 5.1 Current State
+
+Current Hermes code lives at:
+
+```text
+/usr/local/lib/hermes-agent
+```
+
+Current user runtime lives at:
+
+```text
+/root/.hermes
+```
+
+Current risk:
+
+- Personal logic is patched directly into Hermes.
+- The VPS contains local code changes not backed by a clean OS repo.
+
+### 5.2 Target State
+
+Target:
+
+```text
+/opt/personal-ai-os
+```
+
+This directory should be a git checkout of the private repo.
+
+Hermes should load personal OS capabilities from:
+
+```text
+/opt/personal-ai-os/hermes/
+```
+
+or from an installed package generated by that repo.
+
+### 5.3 Deployment Steps Later
+
+Eventually:
+
+1. Pull latest release tag on VPS.
+2. Run validation.
+3. Backup current Hermes config and personal OS state.
+4. Install/update OS plugin/tools.
+5. Restart Hermes only after validation.
+6. Verify Telegram health.
+7. Verify Notion write with dry-run or test page.
+
+No restart should happen without a rollback command written down first.
+
+## 6. Rollback Strategy
+
+### 6.1 Code Rollback
+
+Every deployable state must have:
+
+- Git tag.
+- Previous tag.
+- Deployment log.
+- Exact rollback command.
+
+Example:
+
+```bash
+cd /opt/personal-ai-os
+git fetch --tags
+git checkout v0.2.0-task-capture
+systemctl restart hermes-gateway
+```
+
+### 6.2 Config Rollback
+
+Before touching config:
+
+```text
+/root/.hermes/config.yaml
+/root/.hermes/.env
+/etc/systemd/system/hermes-gateway.service
+/etc/systemd/system/hermes-gateway.service.d/*
+```
+
+must be backed up into timestamped files.
+
+Config templates live in git. Real secrets do not.
+
+### 6.3 Notion Rollback
+
+Notion data rollback is different:
+
+- Do not bulk edit without approval.
+- Prefer create-only operations first.
+- Store source message and idempotency key.
+- For updates, store previous value in event log when possible.
+- For deletes, use archive only, never permanent delete.
+
+## 7. Implementation Phases
+
+## Phase 0 — Baseline Freeze
+
+Goal: Freeze the current audited state before writing code.
+
+Deliverables:
+
+- Hermes audit doc.
+- Architecture spec.
+- Next steps plan.
+- List of current VPS local patches.
+- List of Notion database contracts.
+
+Actions:
+
+1. Create private GitHub repo `personal-ai-os`.
+2. Add docs from current outputs.
+3. Add `CHANGELOG.md`.
+4. Add initial `README.md`.
+5. Tag `v0.1.0-docs-baseline`.
+
+Exit criteria:
+
+- Repo exists.
+- Docs are committed.
+- No code deployed.
+- Current Hermes state is documented.
+
+## Phase 1 — Notion Contracts
+
+Goal: Convert implicit Notion knowledge into explicit contracts.
+
+Deliverables:
+
+- `docs/03-notion-contracts.md`
+- `integrations/notion/contracts/tasks.yaml`
+- `integrations/notion/contracts/projects.yaml`
+- `integrations/notion/contracts/areas.yaml`
+- `integrations/notion/contracts/resources.yaml`
+- `integrations/notion/contracts/knowledge.yaml`
+- `integrations/notion/contracts/entertainment.yaml`
+- `integrations/notion/contracts/expenses.yaml`
+
+Actions:
+
+1. Document database IDs and data source IDs.
+2. Document required fields.
+3. Document safe write operations.
+4. Document operations that require confirmation.
+5. Add fixtures for expected page payloads.
+
+Exit criteria:
+
+- Task create payload can be generated from contract.
+- Expense and media workflows have clear boundaries.
+- No hardcoded DB IDs hidden in random scripts.
+
+## Phase 2 — Extract Current Hermes Patches
+
+Goal: Move personal code out of upstream Hermes.
+
+Current personal patch:
+
+- `tools/notion_task_tool.py`
+- `toolsets.py` addition for `notion_task_create`
+- `todo_tool.py` description change
+
+Target:
+
+- Recreate this as OS-owned Hermes extension under repo.
+- Keep upstream Hermes patch only until replacement is verified.
+
+Actions:
+
+1. Copy current custom task tool into repo.
+2. Generalize it into `integrations/notion/task_capture.py`.
+3. Add tests for title, bucket, comment, invalid bucket, missing token.
+4. Add Hermes registration wrapper.
+5. Document install path.
+
+Exit criteria:
+
+- New repo contains equivalent capability.
+- Tests pass locally.
+- Deployment instructions can install it.
+- Rollback path exists.
+
+## Phase 3 — Router and Agent Definitions
+
+Goal: Define the first generation of OS agents in machine-readable files.
+
+Deliverables:
+
+- Agent YAML files.
+- Prompt markdown files.
+- Shared routing prompt.
+
+Actions:
+
+1. Define Personal Assistant router.
+2. Define Inbox Processor.
+3. Define Task Planner.
+4. Define Resource Importer.
+5. Define Weekly Review.
+6. Add prompt tests using fixed examples.
+
+Exit criteria:
+
+- Example Telegram messages route deterministically.
+- Task messages do not use internal Hermes `todo`.
+- Expense messages route to expense workflow.
+- Unknown messages go to Inbox.
+
+## Phase 4 — Event Log and Idempotency
+
+Goal: Prevent duplicate writes and enable auditability.
+
+Deliverables:
+
+- `events/schemas/event.schema.json`
+- Local SQLite or JSONL event store.
+- Idempotency rules.
+
+Actions:
+
+1. Define event model.
+2. Define idempotency keys.
+3. Add event logging wrapper around Notion writes.
+4. Add replay/read utility.
+
+Exit criteria:
+
+- Same Telegram message cannot create duplicate Notion item.
+- Every write has traceable event metadata.
+- Failures are visible.
+
+## Phase 5 — Telegram To Inbox Automation
+
+Goal: First real automation.
+
+Deliverables:
+
+- `automations/telegram_to_inbox.yaml`
+- Inbox Processor integration.
+- Short Telegram confirmations.
+
+Actions:
+
+1. Classify Telegram input.
+2. Create task/resource/inbox item.
+3. Store source message metadata.
+4. Confirm with Notion URL.
+5. Handle ambiguous input safely.
+
+Exit criteria:
+
+- Text task capture works.
+- Unknown capture goes to Inbox.
+- Duplicate Telegram message does not duplicate item.
+- No long flood-control-prone response.
+
+## Phase 6 — Voice Notes Automation
+
+Goal: Turn voice notes into structured capture.
+
+Deliverables:
+
+- `automations/voice_notes.yaml`
+- Transcription workflow.
+- Transcript source storage.
+
+Actions:
+
+1. Use existing Hermes STT or configured provider.
+2. Classify transcript.
+3. Create Notion item.
+4. Store transcript.
+
+Exit criteria:
+
+- Voice task becomes task.
+- Voice idea becomes Inbox/Knowledge candidate.
+- Low-confidence transcript asks for confirmation.
+
+## Phase 7 — Daily Planning and Weekly Review
+
+Goal: Add useful routines without changing workspace structure.
+
+Deliverables:
+
+- `automations/daily_planning.yaml`
+- `automations/weekly_review.yaml`
+- Review prompt.
+
+Actions:
+
+1. Read `Сегодня`, `На неделе`, active projects, inbox backlog.
+2. Generate daily plan.
+3. Generate weekly review.
+4. Ask before changing many task buckets.
+
+Exit criteria:
+
+- Daily plan can be generated read-only.
+- Weekly review creates one review note.
+- Suggestions are separated from facts.
+
+## Phase 8 — Resource Importers
+
+Goal: Formalize books, movies, links, documents.
+
+Deliverables:
+
+- Book Import automation.
+- Movie Import automation.
+- Generic URL Resource Import automation.
+
+Actions:
+
+1. Wrap existing `notion-films` logic in OS-owned automation definition.
+2. Add book import contract.
+3. Add confirmation step for ambiguous matches.
+4. Add duplicate detection.
+
+Exit criteria:
+
+- Film import has confirmation.
+- Book import has metadata.
+- Generic URL import creates resource entry with source URL.
+
+## Phase 9 — Google Drive Integration
+
+Goal: Connect external files to the OS.
+
+Deliverables:
+
+- Google Drive integration contract.
+- File import automation.
+- Document summary workflow.
+
+Actions:
+
+1. Connect Google Drive.
+2. Read file metadata.
+3. Import selected Docs/PDFs/Sheets.
+4. Link imported files to Resources or Knowledge.
+
+Exit criteria:
+
+- Drive file can become Resource.
+- Document can produce summary note.
+- Source file link is preserved.
+
+## Phase 10 — Search, OCR, Vision
+
+Goal: Add richer input understanding.
+
+Deliverables:
+
+- OCR adapter.
+- Vision adapter.
+- Search enrichment adapter.
+
+Actions:
+
+1. Route images/screenshots to OCR/Vision.
+2. Extract structured data.
+3. Classify into existing workflows.
+
+Exit criteria:
+
+- Screenshot of book/movie/task can be imported.
+- Receipt-like image can become expense candidate.
+- OCR failures are explicit.
+
+## 8. First Coding Task Recommendation
+
+The first coding task should not be a large automation.
+
+Recommended first coding task:
+
+```text
+Create the personal-ai-os repository and move the current notion_task_create capability into a versioned OS-owned Hermes extension with tests.
+```
+
+Why:
+
+- It is small.
+- It fixes the biggest architectural risk.
+- It creates the git/deployment/rollback pattern.
+- It preserves the current working behavior.
+- It gives us a template for all future integrations.
+
+## 9. Definition of Done for Any Feature
+
+No feature is done unless it has:
+
+- Git branch.
+- Code or config in repo.
+- Tests or documented manual verification.
+- Deployment notes.
+- Rollback notes.
+- No secrets committed.
+- Notion write behavior documented.
+- Clear classification: Agent, Automation, or Integration.
+
+## 10. Immediate Next Steps
+
+Recommended next sequence:
+
+1. Create private GitHub repo `personal-ai-os`.
+2. Commit Phase 1 spec and this roadmap.
+3. Add initial folder structure.
+4. Document current Hermes local patches.
+5. Add Notion contract files for tasks first.
+6. Extract `notion_task_create` into repo.
+7. Add tests for task capture payloads.
+8. Prepare deployment script, but do not deploy yet.
+9. Review rollback procedure.
+10. Only then deploy the first OS-owned tool to VPS.
+
+## 11. What Not To Do
+
+Do not:
+
+- Continue patching `/usr/local/lib/hermes-agent` directly.
+- Add more one-off scripts under `/root/.hermes`.
+- Create cron jobs before event logging exists.
+- Bulk edit Notion without explicit approval.
+- Store secrets in git.
+- Mix assistant planning `todo` with user-facing Notion tasks.
+- Let agents invent new Notion databases.
+
+## 12. Architect's Recommendation
+
+Start with a clean private repo and treat it as the control plane.
+
+The first milestone should be boring in the best way:
+
+```text
+Docs committed.
+Current Hermes patch reproduced in repo.
+Tests passing.
+Rollback written.
+No production behavior changed until deployment is explicit.
+```
+
+Once that spine exists, adding agents and automations becomes much safer.

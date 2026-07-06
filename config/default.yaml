@@ -1,0 +1,12 @@
+environment: local
+log_level: info
+
+notion:
+  contracts_path: integrations/notion/contracts
+
+hermes:
+  extension_path: hermes
+
+events:
+  store: jsonl
+  path: state/events.jsonl
