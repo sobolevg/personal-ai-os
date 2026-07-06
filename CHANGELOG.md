@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Documented current Hermes local patches from the VPS runtime.
+
+### Changed
+
+- Updated the draft task Notion contract to match current
+  `notion_task_create` behavior.
+
 ## v0.1.0-docs-baseline - 2026-07-06
 
 ### Added

@@ -1,24 +1,42 @@
 name: tasks
-status: draft
+status: documented_from_current_hermes_patch
 notion:
   database_name: "Мои задачи"
   database_id: "176a0a22-1593-8122-94e7-cdb420698046"
   data_source_id: "176a0a22-1593-81e7-94dd-000ba2c24933"
 properties:
   title:
-    notion_property: "Name"
+    notion_property: "Обезьянопонятная задача"
+    type: title
     required: true
   bucket:
     notion_property: "Когда начать"
+    type: select
     required: true
+    default: "Потом"
     allowed_values:
       - "Сегодня"
       - "На неделе"
       - "Потом"
       - "На выходных"
+  status:
+    notion_property: "Статус"
+    type: select
+    required: true
+    default: "В плане"
+  done:
+    notion_property: "Сделано?"
+    type: checkbox
+    required: true
+    default: false
+  comment:
+    notion_property: "Комментарий"
+    type: rich_text
+    required: false
 safe_operations:
   create: true
   update: confirmation_required
   delete: false
 notes:
-  - "Initial draft mirrors current notion_task_create assumptions."
+  - "Mirrors current /usr/local/lib/hermes-agent/tools/notion_task_tool.py behavior observed on 2026-07-06."
+  - "Current tool uses Notion pages API with parent.database_id, not data_source_id."

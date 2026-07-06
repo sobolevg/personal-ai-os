@@ -36,6 +36,8 @@ Observed local Hermes modifications:
 The `notion_task_create` tool is registered in Hermes toolsets and creates
 pages in the Notion task database with fixed schema assumptions.
 
+Detailed patch inventory: `docs/current-hermes-patches.md`.
+
 ## Architectural Risk
 
 Personal domain logic currently lives inside the Hermes runtime installation.
