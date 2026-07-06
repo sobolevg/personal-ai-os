@@ -53,6 +53,12 @@ Definition of done:
 - no secrets are committed
 - production deployment is explicit
 
+## Local Verification
+
+```bash
+python3 -m unittest discover
+```
+
 ## Repository Rules
 
 - `main` must remain deployable.
