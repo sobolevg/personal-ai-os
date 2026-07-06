@@ -9,11 +9,13 @@
 - Added pure Notion task payload builder with fixture-backed unit tests.
 - Added Hermes wrapper for `notion_task_create` with local unit tests.
 - Added documented install path and script for the Hermes extension bridge.
+- Added deployment log for the first VPS Hermes bridge rollout.
 
 ### Changed
 
 - Updated the draft task Notion contract to match current
   `notion_task_create` behavior.
+- Updated deployment docs to reflect the completed first Hermes bridge rollout.
 
 ## v0.1.0-docs-baseline - 2026-07-06
 

@@ -1,7 +1,7 @@
 # Deployment
 
 Date: 2026-07-06  
-Status: Deployment notes only. No production deployment has happened.
+Status: First Hermes bridge deployment completed.
 
 ## Target Model
 
@@ -52,3 +52,7 @@ deploy/scripts/install-hermes-extension.sh install --apply
 ```
 
 The script does not restart Hermes and does not perform Notion writes.
+
+## Deployment Log
+
+Deployment history is tracked in `docs/08-deployment-log.md`.

@@ -38,6 +38,7 @@ Current baseline docs:
 - `docs/03-notion-contracts.md`
 - `docs/04-deployment.md`
 - `docs/05-operations.md`
+- `docs/08-deployment-log.md`
 
 ## First Milestone
 
@@ -52,6 +53,9 @@ Definition of done:
 - rollback command exists
 - no secrets are committed
 - production deployment is explicit
+
+Current status: first Hermes bridge deployment completed and recorded in
+`docs/08-deployment-log.md`.
 
 ## Local Verification
 
