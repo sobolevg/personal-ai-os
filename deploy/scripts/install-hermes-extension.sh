@@ -130,20 +130,24 @@ text = path.read_text(encoding="utf-8")
 
 changed = False
 
-if '"notion_task_create"' not in text:
-    needle = '    "web_search", "web_extract",\n'
-    insert = (
-        '    "web_search", "web_extract",\n'
-        '    # Evgenii personal Notion task capture, loaded from personal-ai-os bridge.\n'
-        '    "notion_task_create",\n'
-    )
-    if needle not in text:
-        raise SystemExit("Could not find insertion point in toolsets.py")
-    text = text.replace(needle, insert, 1)
+core_entry = (
+    '    # Evgenii personal Notion task capture, loaded from personal-ai-os bridge.\n'
+    '    "notion_task_create",\n'
+)
+legacy_core_entry = (
+    '    # Evgenii personal Notion task capture\n'
+    '    "notion_task_create",\n'
+)
+if core_entry in text:
+    text = text.replace(core_entry, "", 1)
     changed = True
-    print("OK: added notion_task_create to _HERMES_CORE_TOOLS")
+    print("OK: removed notion_task_create from _HERMES_CORE_TOOLS")
+elif legacy_core_entry in text:
+    text = text.replace(legacy_core_entry, "", 1)
+    changed = True
+    print("OK: removed notion_task_create from _HERMES_CORE_TOOLS")
 else:
-    print("OK: toolsets.py already lists notion_task_create")
+    print("OK: notion_task_create is not in _HERMES_CORE_TOOLS")
 
 if '"notion_task"' not in text:
     needle = '    # Scenario-specific toolsets\n'
@@ -168,7 +172,7 @@ if changed:
 PY
 }
 
-ensure_telegram_toolset_enabled() {
+ensure_telegram_toolset_disabled() {
   HERMES_HOME="$HERMES_HOME" PYTHONPATH="$HERMES_DIR:${PYTHONPATH:-}" "$HERMES_PYTHON" - <<'PY'
 from hermes_cli.tools_config import load_config, save_config, _get_platform_tools
 
@@ -178,15 +182,16 @@ telegram = platform_toolsets.setdefault("telegram", [])
 if not isinstance(telegram, list):
     telegram = []
 
-telegram = sorted({str(item) for item in telegram} | {"notion_task"})
+telegram = [str(item) for item in telegram if str(item) != "notion_task"]
 platform_toolsets["telegram"] = telegram
 save_config(config)
 
 effective = _get_platform_tools(config, "telegram")
-if "notion_task" not in effective:
-    raise SystemExit("notion_task was saved but is not effective for telegram")
+if "notion_task" in telegram:
+    raise SystemExit("notion_task was not removed from platform_toolsets.telegram")
 
-print("OK: platform_toolsets.telegram includes notion_task")
+print("OK: platform_toolsets.telegram excludes notion_task")
+print(f"INFO: notion_task effective via other includes: {'notion_task' in effective}")
 PY
 }
 
@@ -212,7 +217,8 @@ Would not:
   edit systemd units
 
 Would update:
-  platform_toolsets.telegram += notion_task
+  define notion_task toolset
+  platform_toolsets.telegram -= notion_task
 
 Run:
   deploy/scripts/install-hermes-extension.sh verify
@@ -248,7 +254,7 @@ install_apply() {
 
   write_bridge
   ensure_toolset_entry
-  ensure_telegram_toolset_enabled
+  ensure_telegram_toolset_disabled
   verify_wrapper
 
   cat <<DONE

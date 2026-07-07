@@ -40,8 +40,8 @@
 - Updated deployment docs to reflect the completed first Hermes bridge rollout.
 - Updated Hermes bridge installation to create the canonical
   `tools/notion_task_create.py` module expected by Hermes discovery.
-- Updated Hermes bridge installation to define the `notion_task` toolset and
-  enable it for Telegram platform config.
+- Updated Hermes bridge installation to define the `notion_task` toolset while
+  keeping direct `notion_task_create` out of Telegram dry-plan routing.
 - Updated deployment and operations docs with the prepared Telegram capture
   runtime install path.
 - Recorded the VPS deployment of the Telegram capture bridge without Telegram

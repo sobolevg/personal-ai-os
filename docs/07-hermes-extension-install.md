@@ -57,7 +57,8 @@ It does not change:
 It only changes `config.yaml` to ensure:
 
 ```text
-platform_toolsets.telegram includes notion_task
+platform_toolsets.telegram excludes notion_task during the Telegram dry-plan
+rollout
 ```
 
 It does not restart:
@@ -112,9 +113,10 @@ The script:
 1. creates a timestamped backup directory under `/root/.hermes/backups`
 2. backs up current Hermes files
 3. writes the compatibility bridge
-4. ensures `toolsets.py` lists `notion_task_create`
+4. ensures `toolsets.py` does not list `notion_task_create` in shared core
+   tools
 5. ensures `toolsets.py` defines the `notion_task` toolset
-6. ensures Telegram platform config enables `notion_task`
+6. ensures Telegram platform config excludes `notion_task`
 7. verifies the OS-owned wrapper import
 
 It does not restart Hermes.
@@ -181,8 +183,9 @@ documented, backed up, and generated from git.
 
 ## Skill Routing Overlay
 
-The bridge makes `notion_task_create` available, but Hermes still needs routing
-instructions that prefer the native tool over generic Notion MCP page creation.
+The bridge makes `notion_task_create` available through the explicit
+`notion_task` toolset. During the Telegram dry-plan rollout, Telegram should use
+`personal_ai_os_telegram_capture` instead of direct Notion writes.
 
 The repo-owned skill overlay lives at:
 
