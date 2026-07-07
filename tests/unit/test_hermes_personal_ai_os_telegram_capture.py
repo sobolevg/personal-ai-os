@@ -26,7 +26,30 @@ class HermesPersonalAIOSCaptureTest(unittest.TestCase):
         self.assertIsNone(result["execution_event"])
         self.assertEqual(result["confirmation_text"], "Task is ready to create.")
 
-    def test_executes_task_capture_with_injected_creator(self) -> None:
+    def test_blocks_execution_without_server_flag(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            event_path = Path(temp_dir) / "events.jsonl"
+
+            result = json.loads(
+                personal_ai_os_telegram_capture.personal_ai_os_telegram_capture(
+                    message="todo: Купить лампочки",
+                    source_message_id="telegram-2",
+                    execute=True,
+                    event_store_path=str(event_path),
+                )
+            )
+
+        self.assertEqual(
+            result,
+            {
+                "error": (
+                    "execution is disabled; set "
+                    "PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED=1 on the server to allow writes"
+                )
+            },
+        )
+
+    def test_executes_task_capture_with_explicit_allow_execute(self) -> None:
         calls = []
 
         def fake_task_creator(**kwargs) -> str:
@@ -49,6 +72,7 @@ class HermesPersonalAIOSCaptureTest(unittest.TestCase):
                     execute=True,
                     event_store_path=str(event_path),
                     task_creator=fake_task_creator,
+                    allow_execute=True,
                 )
             )
 

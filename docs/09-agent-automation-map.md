@@ -41,7 +41,8 @@ Implemented on the VPS:
 
 Not implemented yet:
 
-- Telegram platform enablement for `personal_ai_os_capture`
+- Telegram platform enablement smoke test for `personal_ai_os_capture`
+- Notion write enablement through `PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED`
 - Notion write contracts beyond tasks
 - confirmation UI for ambiguous captures
 
@@ -62,7 +63,7 @@ Not implemented yet:
 
 | Automation | Status | Agents | Write policy | Runtime readiness |
 | --- | --- | --- | --- | --- |
-| Telegram To Inbox | draft | Personal Assistant, Inbox Processor, Task Planner, Resource Importer | `create_only` for high-confidence tasks; draft for unfinished paths | Runtime wrapper deployed; Telegram enablement pending |
+| Telegram To Inbox | draft | Personal Assistant, Inbox Processor, Task Planner, Resource Importer | `create_only` for high-confidence tasks; draft for unfinished paths | Runtime wrapper deployed; Telegram dry-plan enablement next |
 | Voice Notes | draft | Personal Assistant, Inbox Processor | `draft_only` | Needs transcription path |
 | Daily Planning | draft | Task Planner, Weekly Review, Personal Assistant | `read_only` | Needs Notion read contracts |
 | Weekly Review | draft | Weekly Review, Task Planner, Project Manager | `draft_only` | Needs Notion read contracts |
@@ -110,9 +111,10 @@ Before enabling broader runtime automation:
 1. Wrap `Telegram To Inbox` around the existing dispatch plan.
 2. Record planned events before writes.
 3. Block duplicate events by idempotency key.
-4. Enable `personal_ai_os_capture` for Telegram after dry-plan validation.
-5. Add confirmation/draft handling for resource, expense, and inbox paths.
-6. Tag a runtime checkpoint after VPS deploy verification.
+4. Enable `personal_ai_os_capture` for Telegram with execution disabled.
+5. Validate one Telegram dry-plan message.
+6. Add confirmation/draft handling for resource, expense, and inbox paths.
+7. Tag a runtime checkpoint after VPS deploy verification.
 
 ## Checkpoint Criteria
 

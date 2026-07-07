@@ -82,9 +82,23 @@ deploy/scripts/install-telegram-capture-runtime.sh install --apply
 This only installs the `personal_ai_os_telegram_capture` bridge and
 `personal_ai_os_capture` toolset. It does not enable the toolset for Telegram.
 
+Enable or disable Telegram dry-plan access with:
+
+```bash
+deploy/scripts/enable-telegram-capture-runtime.sh plan
+deploy/scripts/enable-telegram-capture-runtime.sh verify
+deploy/scripts/enable-telegram-capture-runtime.sh enable --apply
+deploy/scripts/enable-telegram-capture-runtime.sh disable --apply
+```
+
+This changes `platform_toolsets.telegram`, but does not enable
+`PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED`.
+
 Before activation, confirm:
 
 - event log path is installed and valid
 - Hermes imports the bridge without errors
 - rollback command from the install output is saved
 - `platform_toolsets.telegram` change is intentional and reviewed
+- `PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED` is unset unless Notion writes are
+  explicitly approved

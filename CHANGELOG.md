@@ -30,6 +30,8 @@
   backup, and rotation.
 - Added Hermes wrapper and install script for the Telegram capture runtime,
   behind the separate `personal_ai_os_capture` toolset.
+- Added a Telegram capture enable/disable script for
+  `platform_toolsets.telegram`.
 
 ### Changed
 
@@ -44,6 +46,8 @@
   runtime install path.
 - Recorded the VPS deployment of the Telegram capture bridge without Telegram
   platform enablement.
+- Blocked Telegram capture execution unless
+  `PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED=1` is set server-side.
 
 ## v0.1.0-docs-baseline - 2026-07-06
 

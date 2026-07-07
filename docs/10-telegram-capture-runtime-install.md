@@ -1,7 +1,7 @@
 # Telegram Capture Runtime Install
 
-Date: 2026-07-07  
-Status: prepared, not Telegram-enabled.
+Date: 2026-07-08  
+Status: bridge deployed; Telegram enablement is managed separately.
 
 ## Purpose
 
@@ -41,8 +41,8 @@ The script does not:
 - edit systemd units
 
 The tool itself defaults to `execute=false`, which means plan and event logging
-only. Direct writes require `execute=true` and are still limited by the Telegram
-capture runtime rules.
+only. Direct writes require both `execute=true` and the server-side
+`PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED=1` flag.
 
 ## Event Log
 
@@ -60,13 +60,24 @@ Default path:
 
 ## Activation Still Required
 
-After this bridge is installed and reviewed, activation is a separate step:
+After this bridge is installed and reviewed, Telegram dry-plan activation is a
+separate step:
 
 1. restart Hermes after reviewing the generated rollback command
 2. verify the tool is discoverable in Hermes
-3. add `personal_ai_os_capture` to `platform_toolsets.telegram`
+3. add `personal_ai_os_capture` to `platform_toolsets.telegram`:
+
+```bash
+deploy/scripts/enable-telegram-capture-runtime.sh plan
+deploy/scripts/enable-telegram-capture-runtime.sh verify
+deploy/scripts/enable-telegram-capture-runtime.sh enable --apply
+```
+
 4. restart Hermes again
-5. test one dry-plan message before any `execute=true` call
+5. test one dry-plan message
+
+This does not enable Notion writes because
+`PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED` remains unset.
 
 ## Rollback
 

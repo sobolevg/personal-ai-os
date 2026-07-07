@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any, Callable
 
@@ -36,6 +37,7 @@ def personal_ai_os_telegram_capture(
     source_platform: str = "telegram",
     *,
     task_creator: TaskCreator | None = None,
+    allow_execute: bool | None = None,
 ) -> str:
     """Plan or execute Telegram capture through the repo-owned runtime path."""
     if not message or not message.strip():
@@ -46,6 +48,11 @@ def personal_ai_os_telegram_capture(
     try:
         resolved_event_path = Path(event_store_path) if event_store_path else None
         if execute:
+            if not _execution_enabled(allow_execute):
+                return tool_error(
+                    "execution is disabled; set "
+                    "PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED=1 on the server to allow writes"
+                )
             result = execute_telegram_capture(
                 message=message,
                 source_message_id=source_message_id,
@@ -64,6 +71,12 @@ def personal_ai_os_telegram_capture(
         return tool_error(str(error))
 
     return json.dumps(result.to_dict(), ensure_ascii=False, sort_keys=True)
+
+
+def _execution_enabled(allow_execute: bool | None = None) -> bool:
+    if allow_execute is not None:
+        return allow_execute
+    return os.environ.get("PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED") == "1"
 
 
 PERSONAL_AI_OS_TELEGRAM_CAPTURE_SCHEMA = {
@@ -90,8 +103,8 @@ PERSONAL_AI_OS_TELEGRAM_CAPTURE_SCHEMA = {
             "execute": {
                 "type": "boolean",
                 "description": (
-                    "When false, only plan/log. When true, execute safe create-only "
-                    "actions such as high-confidence task creation."
+                    "When false, only plan/log. When true, execution is still blocked "
+                    "unless the server enables PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED=1."
                 ),
                 "default": False,
             },
