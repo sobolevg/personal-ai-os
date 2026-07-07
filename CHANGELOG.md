@@ -55,6 +55,8 @@
   pending.
 - Updated the `notion-tasks` Hermes skill to route ordinary Telegram task
   captures to `personal_ai_os_telegram_capture` with `execute=false`.
+- Blocked direct `notion_task_create` writes unless
+  `PERSONAL_AI_OS_NOTION_TASK_CREATE_ENABLED=1` is set server-side.
 
 ## v0.1.0-docs-baseline - 2026-07-06
 

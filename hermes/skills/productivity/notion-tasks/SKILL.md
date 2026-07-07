@@ -58,6 +58,8 @@ notion_task_create
 
 Use `notion_task_create` only when a direct Notion task write is explicitly
 intended and the request is not part of the Telegram dry-plan capture rollout.
+Direct writes are blocked unless
+`PERSONAL_AI_OS_NOTION_TASK_CREATE_ENABLED=1` is set on the server.
 
 Do not create personal tasks with generic Notion MCP page creation tools when
 `notion_task_create` is available.

@@ -90,7 +90,15 @@ def notion_task_create(
     *,
     token: str | None = None,
     urlopen: Callable[..., Any] = urllib.request.urlopen,
+    allow_create: bool | None = None,
 ) -> str:
+    if not _task_creation_enabled(allow_create):
+        return tool_error(
+            "notion_task_create is disabled; use personal_ai_os_telegram_capture "
+            "with execute=false unless PERSONAL_AI_OS_NOTION_TASK_CREATE_ENABLED=1 "
+            "is set on the server"
+        )
+
     try:
         task_input = validate_task_capture_input(
             title=title,
@@ -123,6 +131,12 @@ def notion_task_create(
         "comment": task_input.comment,
     }
     return json.dumps(result, ensure_ascii=False)
+
+
+def _task_creation_enabled(allow_create: bool | None = None) -> bool:
+    if allow_create is not None:
+        return allow_create
+    return os.environ.get("PERSONAL_AI_OS_NOTION_TASK_CREATE_ENABLED") == "1"
 
 
 NOTION_TASK_CREATE_SCHEMA = {

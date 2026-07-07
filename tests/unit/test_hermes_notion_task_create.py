@@ -40,6 +40,7 @@ class HermesNotionTaskCreateTest(unittest.TestCase):
                 comment=" Уточнить лимиты ",
                 token="test-token",
                 urlopen=fake_urlopen,
+                allow_create=True,
             )
         )
 
@@ -80,6 +81,7 @@ class HermesNotionTaskCreateTest(unittest.TestCase):
                 bucket="Сегодня",
                 token="test-token",
                 urlopen=fail_urlopen,
+                allow_create=True,
             )
         )
 
@@ -95,12 +97,37 @@ class HermesNotionTaskCreateTest(unittest.TestCase):
                     title="Купить лампочки",
                     bucket="На выходных",
                     urlopen=fail_urlopen,
+                    allow_create=True,
                 )
             )
 
         self.assertEqual(
             result,
             {"error": "NOTION_TOKEN or NOTION_API_KEY is not configured"},
+        )
+
+    def test_blocks_creation_without_server_flag(self) -> None:
+        def fail_urlopen(*args, **kwargs):
+            raise AssertionError("urlopen should not be called")
+
+        result = json.loads(
+            notion_task_create.notion_task_create(
+                title="Купить лампочки",
+                bucket="Сегодня",
+                token="test-token",
+                urlopen=fail_urlopen,
+            )
+        )
+
+        self.assertEqual(
+            result,
+            {
+                "error": (
+                    "notion_task_create is disabled; use personal_ai_os_telegram_capture "
+                    "with execute=false unless PERSONAL_AI_OS_NOTION_TASK_CREATE_ENABLED=1 "
+                    "is set on the server"
+                )
+            },
         )
 
     def test_register_tool_uses_expected_contract(self) -> None:
