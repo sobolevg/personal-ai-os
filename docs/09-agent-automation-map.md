@@ -41,12 +41,13 @@ Implemented on the VPS:
   by default
 - explicit Telegram native-tool dry-plan smoke test for
   `personal_ai_os_telegram_capture`
+- ordinary Telegram `todo:` dry-plan smoke test through
+  `personal_ai_os_telegram_capture`
+- direct `notion_task_create` writes blocked unless explicitly enabled
 - event log path at `/root/.hermes/personal-ai-os/events/events.jsonl`
 
 Not implemented yet:
 
-- automatic routing from ordinary task-like Telegram messages into
-  `personal_ai_os_telegram_capture`
 - Notion write enablement through `PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED`
 - Notion write contracts beyond tasks
 - confirmation UI for ambiguous captures
@@ -68,7 +69,7 @@ Not implemented yet:
 
 | Automation | Status | Agents | Write policy | Runtime readiness |
 | --- | --- | --- | --- | --- |
-| Telegram To Inbox | draft | Personal Assistant, Inbox Processor, Task Planner, Resource Importer | `create_only` for high-confidence tasks; draft for unfinished paths | Explicit native-tool smoke passed; automatic routing pending |
+| Telegram To Inbox | draft | Personal Assistant, Inbox Processor, Task Planner, Resource Importer | `create_only` for high-confidence tasks; draft for unfinished paths | Ordinary Telegram dry-plan routing passed; writes still disabled |
 | Voice Notes | draft | Personal Assistant, Inbox Processor | `draft_only` | Needs transcription path |
 | Daily Planning | draft | Task Planner, Weekly Review, Personal Assistant | `read_only` | Needs Notion read contracts |
 | Weekly Review | draft | Weekly Review, Task Planner, Project Manager | `draft_only` | Needs Notion read contracts |
@@ -116,11 +117,10 @@ Before enabling broader runtime automation:
 1. Wrap `Telegram To Inbox` around the existing dispatch plan.
 2. Record planned events before writes.
 3. Block duplicate events by idempotency key.
-4. Update Telegram routing prompt/skill so ordinary task-like messages use
-   `personal_ai_os_telegram_capture`.
-5. Validate one ordinary user-sent Telegram dry-plan message.
-6. Add confirmation/draft handling for resource, expense, and inbox paths.
-7. Tag a runtime checkpoint after automatic routing verification.
+4. Add confirmation/draft handling for resource, expense, and inbox paths.
+5. Decide when to enable Notion task writes through the server-side execution
+   flags.
+6. Tag a runtime checkpoint after automatic routing verification.
 
 ## Checkpoint Criteria
 

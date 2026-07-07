@@ -1,5 +1,78 @@
 # Deployment Log
 
+## 2026-07-08 - Telegram Capture Auto Routing
+
+Status: ordinary Telegram `todo:` messages route to the capture event log with
+direct Notion writes disabled.
+
+Commits deployed:
+
+```text
+4ad994d feat: route telegram task captures to capture tool
+3616a08 fix: gate direct notion task writes
+33002d7 fix: keep notion task out of telegram dry-plan tools
+```
+
+Target:
+
+```text
+VPS host: hermes
+Checkout: /opt/personal-ai-os
+Hermes service: hermes-gateway.service
+Branch: phase3-capture-router-v1
+```
+
+Validation and install:
+
+- ran `python3 -m unittest discover` on the VPS: 39 tests OK
+- installed updated `notion-tasks` skill routing overlay
+- installed updated `notion_task_create` bridge with server-side write gate
+- installed updated `personal_ai_os_telegram_capture` bridge
+- updated `toolsets.py` so `notion_task_create` is not in shared core tools
+- updated Telegram platform config to `['hermes-telegram', 'personal_ai_os_capture']`
+- restarted `hermes-gateway.service`
+
+Backups:
+
+```text
+/root/.hermes/backups/personal-ai-os-skill-notion-tasks-20260707T224335Z
+/root/.hermes/backups/personal-ai-os-20260707T224331Z
+/root/.hermes/backups/personal-ai-os-telegram-capture-20260707T224335Z
+```
+
+Safety incident during rollout:
+
+- A first ordinary Telegram smoke still selected direct `notion_task_create` and
+  created a Notion task titled `auto routing smoke personal ai os`.
+- The page was immediately archived:
+  `396a0a22-1593-81e0-852c-db6545d5bd8d`.
+- Direct `notion_task_create` is now blocked unless
+  `PERSONAL_AI_OS_NOTION_TASK_CREATE_ENABLED=1` is set server-side.
+- `PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED` remains unset.
+
+Final smoke:
+
+- Sent ordinary Telegram message:
+  `todo: clean capture routing smoke 20260708`.
+- Hermes replied that the item was planned and not written to Notion.
+- Event log contains a planned event:
+  - route: `task`
+  - action: `notion_task_create`
+  - source message id: `535074-3`
+  - normalized text: `todo: clean capture routing smoke 20260708`
+  - Notion page id: `null`
+- No Notion page was created by the final smoke.
+
+Rollback:
+
+```bash
+cp "/root/.hermes/backups/personal-ai-os-20260707T224331Z/toolsets.py" "/usr/local/lib/hermes-agent/toolsets.py"
+cp "/root/.hermes/backups/personal-ai-os-20260707T224331Z/config.yaml" "/root/.hermes/config.yaml"
+rm -rf "/root/.hermes/skills/productivity/notion-tasks"
+cp -R "/root/.hermes/backups/personal-ai-os-skill-notion-tasks-20260707T224335Z/notion-tasks" "/root/.hermes/skills/productivity/notion-tasks"
+systemctl restart hermes-gateway
+```
+
 ## 2026-07-08 - Telegram Capture Dry-Plan Enablement
 
 Status: enabled for Telegram with execution blocked; explicit native-tool smoke
