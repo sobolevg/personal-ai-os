@@ -23,6 +23,8 @@
   automations.
 - Added an agent and automation map for the Phase 3 design checkpoint.
 - Added a local event log schema, JSONL store, and idempotency helpers.
+- Added runtime-safe Telegram capture planning around dispatch and event
+  logging.
 
 ### Changed
 

@@ -36,11 +36,17 @@
   "execution": {
     "mode": "event_driven",
     "write_policy": "create_only",
-    "entrypoint": "integrations.routing.capture_dispatch.build_capture_dispatch_plan"
+    "entrypoint": "integrations.automations.telegram_to_inbox.plan_telegram_capture"
   },
   "verification": {
-    "fixtures": ["tests/fixtures/automations/telegram_to_inbox.examples.json"],
-    "unit_tests": ["tests/unit/test_automation_contracts.py", "tests/unit/test_capture_dispatch.py"]
+    "fixtures": [
+      "tests/fixtures/automations/telegram_to_inbox.examples.json",
+      "tests/fixtures/automations/telegram_to_inbox_runtime.expected.json"
+    ],
+    "unit_tests": [
+      "tests/unit/test_automation_contracts.py",
+      "tests/unit/test_capture_dispatch.py",
+      "tests/unit/test_telegram_to_inbox_runtime.py"
+    ]
   }
 }
-

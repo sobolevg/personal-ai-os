@@ -1,0 +1,32 @@
+[
+  {
+    "name": "task",
+    "expected": {
+      "route": "task",
+      "action": "notion_task_create",
+      "write_policy": "create_only",
+      "event_status": "planned",
+      "should_execute_action": true,
+      "confirmation_text": "Task is ready to create."
+    }
+  },
+  {
+    "name": "duplicate",
+    "expected": {
+      "event_status": "skipped_duplicate",
+      "should_execute_action": false,
+      "confirmation_text": "Already captured."
+    }
+  },
+  {
+    "name": "draft",
+    "expected": {
+      "route": "resource",
+      "action": "resource_candidate",
+      "write_policy": "draft_only",
+      "event_status": "planned",
+      "should_execute_action": false,
+      "confirmation_text": "Captured as a draft candidate."
+    }
+  }
+]

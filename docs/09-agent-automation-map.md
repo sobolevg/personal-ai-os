@@ -28,10 +28,12 @@ Implemented as local foundations, not deployed:
 - event log schema and JSONL store
 - idempotency key generation from source platform, source message id, and
   action
+- runtime-safe Telegram capture planning around dispatch and event logging
 
 Not implemented yet:
 
 - production Telegram automation wrapper
+- direct Notion execution inside the Telegram automation wrapper
 - Notion write contracts beyond tasks
 - confirmation UI for ambiguous captures
 - VPS deploy for the Phase 3 design layer
@@ -101,7 +103,7 @@ Before enabling broader runtime automation:
 1. Wrap `Telegram To Inbox` around the existing dispatch plan.
 2. Record planned events before writes.
 3. Block duplicate events by idempotency key.
-4. Keep only high-confidence task creation as direct Notion write.
+4. Wire the ready-to-execute task path to `notion_task_create`.
 5. Add confirmation/draft handling for resource, expense, and inbox paths.
 6. Tag a design checkpoint before any VPS deploy.
 
