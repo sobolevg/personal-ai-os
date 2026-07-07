@@ -42,6 +42,8 @@
   enable it for Telegram platform config.
 - Updated deployment and operations docs with the prepared Telegram capture
   runtime install path.
+- Recorded the VPS deployment of the Telegram capture bridge without Telegram
+  platform enablement.
 
 ## v0.1.0-docs-baseline - 2026-07-06
 

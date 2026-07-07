@@ -23,7 +23,7 @@ Implemented in git:
 - deterministic capture router and dispatch plan tests
 - Hermes native `notion_task_create` bridge for task creation
 
-Implemented as local foundations, not deployed:
+Implemented as local foundations:
 
 - event log schema and JSONL store
 - idempotency key generation from source platform, source message id, and
@@ -32,16 +32,18 @@ Implemented as local foundations, not deployed:
 - task execution path for high-confidence Telegram captures, with executed or
   failed outcome events
 - event log path management script for install, backup, and rotation
+
+Implemented on the VPS:
+
 - Hermes bridge for `personal_ai_os_telegram_capture`, behind a separate
   `personal_ai_os_capture` toolset
+- event log path at `/root/.hermes/personal-ai-os/events/events.jsonl`
 
 Not implemented yet:
 
-- VPS deployment of the Telegram capture runtime wrapper
 - Telegram platform enablement for `personal_ai_os_capture`
 - Notion write contracts beyond tasks
 - confirmation UI for ambiguous captures
-- VPS deploy for the Phase 3 design layer
 
 ## Agent Catalog
 
@@ -60,7 +62,7 @@ Not implemented yet:
 
 | Automation | Status | Agents | Write policy | Runtime readiness |
 | --- | --- | --- | --- | --- |
-| Telegram To Inbox | draft | Personal Assistant, Inbox Processor, Task Planner, Resource Importer | `create_only` for high-confidence tasks; draft for unfinished paths | Runtime wrapper prepared; Telegram enablement pending |
+| Telegram To Inbox | draft | Personal Assistant, Inbox Processor, Task Planner, Resource Importer | `create_only` for high-confidence tasks; draft for unfinished paths | Runtime wrapper deployed; Telegram enablement pending |
 | Voice Notes | draft | Personal Assistant, Inbox Processor | `draft_only` | Needs transcription path |
 | Daily Planning | draft | Task Planner, Weekly Review, Personal Assistant | `read_only` | Needs Notion read contracts |
 | Weekly Review | draft | Weekly Review, Task Planner, Project Manager | `draft_only` | Needs Notion read contracts |
@@ -108,11 +110,9 @@ Before enabling broader runtime automation:
 1. Wrap `Telegram To Inbox` around the existing dispatch plan.
 2. Record planned events before writes.
 3. Block duplicate events by idempotency key.
-4. Deploy the wrapper to Hermes behind the separate `personal_ai_os_capture`
-   toolset.
-5. Enable `personal_ai_os_capture` for Telegram after dry-plan validation.
-6. Add confirmation/draft handling for resource, expense, and inbox paths.
-7. Tag a runtime checkpoint after VPS deploy verification.
+4. Enable `personal_ai_os_capture` for Telegram after dry-plan validation.
+5. Add confirmation/draft handling for resource, expense, and inbox paths.
+6. Tag a runtime checkpoint after VPS deploy verification.
 
 ## Checkpoint Criteria
 
@@ -121,5 +121,5 @@ This design layer is ready to merge when:
 - all contract tests pass
 - all agent and automation contracts are present
 - this map matches the contract catalog
-- no VPS deploy is required for the merge
-- rollout notes clearly say this is a design checkpoint, not runtime activation
+- VPS deploy is recorded in the deployment log
+- rollout notes clearly say this is a bridge checkpoint, not Telegram activation
