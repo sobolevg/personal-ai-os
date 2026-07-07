@@ -1,5 +1,68 @@
 # Deployment Log
 
+## 2026-07-08 - Knowledge Curator Draft Runtime
+
+Status: deployed the first partial-runtime agent. Telegram knowledge captures
+now route to planned `knowledge_candidate` events with Knowledge Curator draft
+metadata. Notion writes remain disabled.
+
+Commits deployed:
+
+```text
+315e850 feat: add knowledge curator draft runtime
+c8f492e docs: clarify telegram capture knowledge routing
+9db2fac feat: add personal ai os capture skill overlay
+```
+
+Target:
+
+```text
+VPS host: hermes
+Checkout: /opt/personal-ai-os
+Hermes service: hermes-gateway.service
+Branch: phase3-capture-router-v1
+```
+
+Deployment:
+
+- transferred branch updates as git bundles.
+- merged with `git merge --ff-only origin/phase3-capture-router-v1`.
+- installed the new Hermes skill overlay:
+  `personal-ai-os-capture`.
+- restarted `hermes-gateway.service`.
+
+Validation:
+
+- ran `python3 -m unittest discover` on the VPS: 50 tests OK
+- confirmed `hermes-gateway.service` is active
+- sent Telegram smoke:
+  `подумать над knowledge curator overlay smoke personal ai os 20260708`
+- event log recorded:
+  - status: `planned`
+  - route: `knowledge`
+  - action: `knowledge_candidate`
+  - target: `notion.knowledge`
+  - write policy: `draft_only`
+  - agent: `knowledge_curator`
+  - Notion page id: `null`
+- Knowledge Curator draft metadata included title, summary, durable ideas, open
+  questions, suggested tasks, and topic links.
+
+Backup:
+
+```text
+/root/.hermes/backups/personal-ai-os-skill-personal-ai-os-capture-20260707T231011Z
+```
+
+Rollback:
+
+```bash
+cd /opt/personal-ai-os
+git checkout v0.3.4-event-review-tooling
+rm -rf "/root/.hermes/skills/productivity/personal-ai-os-capture"
+systemctl restart hermes-gateway
+```
+
 ## 2026-07-08 - Event Log Review Tooling
 
 Status: deployed read-only review tooling for planned Telegram capture events.
