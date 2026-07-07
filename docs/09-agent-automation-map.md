@@ -39,11 +39,14 @@ Implemented on the VPS:
   `personal_ai_os_capture` toolset
 - Telegram platform access to `personal_ai_os_capture`, with execution blocked
   by default
+- explicit Telegram native-tool dry-plan smoke test for
+  `personal_ai_os_telegram_capture`
 - event log path at `/root/.hermes/personal-ai-os/events/events.jsonl`
 
 Not implemented yet:
 
-- user-sent Telegram dry-plan smoke test for `personal_ai_os_capture`
+- automatic routing from ordinary task-like Telegram messages into
+  `personal_ai_os_telegram_capture`
 - Notion write enablement through `PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED`
 - Notion write contracts beyond tasks
 - confirmation UI for ambiguous captures
@@ -65,7 +68,7 @@ Not implemented yet:
 
 | Automation | Status | Agents | Write policy | Runtime readiness |
 | --- | --- | --- | --- | --- |
-| Telegram To Inbox | draft | Personal Assistant, Inbox Processor, Task Planner, Resource Importer | `create_only` for high-confidence tasks; draft for unfinished paths | Telegram dry-plan enabled; user-sent smoke pending |
+| Telegram To Inbox | draft | Personal Assistant, Inbox Processor, Task Planner, Resource Importer | `create_only` for high-confidence tasks; draft for unfinished paths | Explicit native-tool smoke passed; automatic routing pending |
 | Voice Notes | draft | Personal Assistant, Inbox Processor | `draft_only` | Needs transcription path |
 | Daily Planning | draft | Task Planner, Weekly Review, Personal Assistant | `read_only` | Needs Notion read contracts |
 | Weekly Review | draft | Weekly Review, Task Planner, Project Manager | `draft_only` | Needs Notion read contracts |
@@ -113,9 +116,11 @@ Before enabling broader runtime automation:
 1. Wrap `Telegram To Inbox` around the existing dispatch plan.
 2. Record planned events before writes.
 3. Block duplicate events by idempotency key.
-4. Validate one user-sent Telegram dry-plan message.
-5. Add confirmation/draft handling for resource, expense, and inbox paths.
-6. Tag a runtime checkpoint after Telegram smoke verification.
+4. Update Telegram routing prompt/skill so ordinary task-like messages use
+   `personal_ai_os_telegram_capture`.
+5. Validate one ordinary user-sent Telegram dry-plan message.
+6. Add confirmation/draft handling for resource, expense, and inbox paths.
+7. Tag a runtime checkpoint after automatic routing verification.
 
 ## Checkpoint Criteria
 

@@ -2,7 +2,8 @@
 
 ## 2026-07-08 - Telegram Capture Dry-Plan Enablement
 
-Status: enabled for Telegram with execution blocked.
+Status: enabled for Telegram with execution blocked; explicit native-tool smoke
+tested.
 
 Commit deployed:
 
@@ -58,6 +59,29 @@ Post-restart validation:
   `execution is disabled; set PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED=1 on the server to allow writes`.
 - Smoke checks used a temporary event log under `/tmp` and did not write to
   Notion.
+
+Telegram smoke:
+
+- Sent from Telegram Web to `@hermes_evgenii_bot`:
+  `todo: smoke dry plan personal ai os`.
+- Result: Hermes responded, but selected the older terminal path rather than
+  `personal_ai_os_telegram_capture`.
+- Sent explicit native-tool smoke:
+  `Use native tool personal_ai_os_telegram_capture with execute=false for message: todo: smoke dry plan personal ai os explicit`.
+- Result: Hermes called `personal_ai_os_telegram_capture`.
+- Event log now contains one planned event:
+  - route: `task`
+  - action: `notion_task_create`
+  - source platform: `telegram`
+  - source message id: `telegram:535063`
+  - normalized text: `todo: smoke dry plan personal ai os explicit`
+  - Notion page id: `null`
+- No Notion write occurred.
+
+Follow-up:
+
+- Update routing prompt/skill behavior so ordinary task-like Telegram messages
+  choose `personal_ai_os_telegram_capture` without an explicit tool instruction.
 
 Rollback:
 
