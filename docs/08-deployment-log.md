@@ -1,5 +1,57 @@
 # Deployment Log
 
+## 2026-07-08 - Event Log Review Tooling
+
+Status: deployed read-only review tooling for planned Telegram capture events.
+
+Commit deployed:
+
+```text
+6769bd0 feat: add event log review tooling
+```
+
+Target:
+
+```text
+VPS host: hermes
+Checkout: /opt/personal-ai-os
+Hermes service: hermes-gateway.service
+Branch: phase3-capture-router-v1
+```
+
+Deployment transport:
+
+- transferred the branch update as a git bundle because the VPS still does not
+  have GitHub SSH access.
+- merged with `git merge --ff-only origin/phase3-capture-router-v1`.
+- no Hermes restart was required because this rollout only adds repo-owned
+  review tooling.
+
+Validation:
+
+- ran `python3 -m unittest discover` on the VPS: 44 tests OK
+- ran `deploy/scripts/review-event-log.sh summary`
+- ran `deploy/scripts/review-event-log.sh pending`
+- confirmed `hermes-gateway.service` is active
+
+Review result:
+
+- event log path: `/root/.hermes/personal-ai-os/events/events.jsonl`
+- total events: 3
+- pending planned events: 3
+- statuses: `planned=3`
+- pending items are the previous dry-plan Telegram smoke captures:
+  - `todo: smoke dry plan personal ai os explicit`
+  - `todo: dry plan only capture smoke 20260708`
+  - `todo: clean capture routing smoke 20260708`
+
+Rollback:
+
+```bash
+cd /opt/personal-ai-os
+git checkout c7c1446
+```
+
 ## 2026-07-08 - Telegram Capture Auto Routing
 
 Status: ordinary Telegram `todo:` messages route to the capture event log with
