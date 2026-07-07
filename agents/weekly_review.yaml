@@ -1,2 +1,4 @@
 name: weekly_review
-status: todo
+status: draft
+contract: agents/weekly_review.agent.json
+prompt: prompts/agents/weekly_review.md

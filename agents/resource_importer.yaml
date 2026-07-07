@@ -1,2 +1,4 @@
 name: resource_importer
-status: todo
+status: draft
+contract: agents/resource_importer.agent.json
+prompt: prompts/agents/resource_importer.md

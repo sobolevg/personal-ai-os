@@ -1,0 +1,13 @@
+[
+  {
+    "name": "url_resource",
+    "input": {
+      "resource_reference": "https://example.com/article"
+    },
+    "expected": {
+      "resource_type": "url",
+      "needs_confirmation": false
+    }
+  }
+]
+

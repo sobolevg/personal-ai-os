@@ -1,2 +1,4 @@
 name: task_planner
-status: todo
+status: draft
+contract: agents/task_planner.agent.json
+prompt: prompts/agents/task_planner.md

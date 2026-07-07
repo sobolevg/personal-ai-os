@@ -1,0 +1,13 @@
+[
+  {
+    "name": "weekly_snapshot",
+    "input": {
+      "week_range": "2026-07-06..2026-07-12",
+      "tasks_snapshot": []
+    },
+    "expected": {
+      "proposed_changes": []
+    }
+  }
+]
+

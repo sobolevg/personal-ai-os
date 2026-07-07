@@ -1,0 +1,14 @@
+[
+  {
+    "name": "simple_task",
+    "input": {
+      "task_title": "renew passport",
+      "bucket": "На неделе"
+    },
+    "expected": {
+      "recommended_bucket": "На неделе",
+      "needs_confirmation": false
+    }
+  }
+]
+

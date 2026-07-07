@@ -1,2 +1,4 @@
 name: project_manager
-status: todo
+status: draft
+contract: agents/project_manager.agent.json
+prompt: prompts/agents/project_manager.md

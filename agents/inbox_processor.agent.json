@@ -1,0 +1,51 @@
+{
+  "name": "inbox_processor",
+  "status": "draft",
+  "purpose": "Turn ambiguous captured notes into safe, reviewable Personal AI OS candidates.",
+  "prompt": "prompts/agents/inbox_processor.md",
+  "inputs": [
+    {"name": "message", "type": "string", "required": true},
+    {"name": "source_platform", "type": "string", "required": true},
+    {"name": "source_message_id", "type": "string", "required": true},
+    {"name": "router_signals", "type": "array", "required": false}
+  ],
+  "outputs": [
+    {"name": "candidate_type", "type": "enum", "values": ["task", "resource", "knowledge", "project", "unclear"]},
+    {"name": "summary", "type": "string"},
+    {"name": "needs_confirmation", "type": "boolean"}
+  ],
+  "tools": ["memory", "notion.inbox_candidate"],
+  "triggers": ["Personal Assistant routes to inbox", "manual inbox cleanup"],
+  "workflow": [
+    "Read the captured text and routing signals.",
+    "Summarize the note in one clear sentence.",
+    "Suggest the most likely target type.",
+    "Mark low-confidence or multi-intent notes as needing confirmation.",
+    "Do not write to specialized Notion databases directly."
+  ],
+  "prompt_contract": {
+    "style": "concise",
+    "default_action": "draft_only"
+  },
+  "safety_rules": [
+    "prefer_review_over_guessing",
+    "do_not_bulk_edit_notion_without_confirmation",
+    "do_not_delete_or_archive_source_items"
+  ],
+  "future_improvements": [
+    "Cluster similar inbox items.",
+    "Suggest next actions from weekly review context.",
+    "Add duplicate detection after event log exists."
+  ],
+  "routing": {
+    "default_route": "inbox",
+    "allowed_routes": ["inbox"],
+    "allowed_actions": ["inbox_candidate"],
+    "write_policies": {"inbox": "draft_only"}
+  },
+  "verification": {
+    "fixtures": ["tests/fixtures/agents/inbox_processor.examples.json"],
+    "unit_tests": ["tests/unit/test_agent_contracts.py"]
+  }
+}
+

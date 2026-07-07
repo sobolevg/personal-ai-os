@@ -1,0 +1,52 @@
+{
+  "name": "task_planner",
+  "status": "draft",
+  "purpose": "Convert captured or reviewed tasks into clear next actions and safe planning suggestions.",
+  "prompt": "prompts/agents/task_planner.md",
+  "inputs": [
+    {"name": "task_title", "type": "string", "required": true},
+    {"name": "comment", "type": "string", "required": false},
+    {"name": "bucket", "type": "string", "required": false},
+    {"name": "project_hint", "type": "string", "required": false}
+  ],
+  "outputs": [
+    {"name": "normalized_task", "type": "string"},
+    {"name": "recommended_bucket", "type": "enum", "values": ["Сегодня", "На неделе", "Потом", "На выходных"]},
+    {"name": "subtasks", "type": "array"},
+    {"name": "needs_confirmation", "type": "boolean"}
+  ],
+  "tools": ["notion_task_create", "integrations.notion.task_capture.build_task_create_payload"],
+  "triggers": ["Personal Assistant routes to task", "Task Breakdown automation", "Daily Planning automation"],
+  "workflow": [
+    "Normalize the task title.",
+    "Keep the task small enough to execute.",
+    "Recommend a start bucket using explicit user language first.",
+    "Suggest subtasks only when the task is clearly multi-step.",
+    "Ask for confirmation before assigning project relations."
+  ],
+  "prompt_contract": {
+    "style": "practical",
+    "default_action": "create_or_suggest"
+  },
+  "safety_rules": [
+    "do_not_invent_deadlines",
+    "do_not_create_project_relations_without_contract",
+    "do_not_use_internal_hermes_todo"
+  ],
+  "future_improvements": [
+    "Infer project relation from known project aliases.",
+    "Estimate effort and energy level.",
+    "Use event log to prevent duplicate tasks."
+  ],
+  "routing": {
+    "default_route": "task",
+    "allowed_routes": ["task"],
+    "allowed_actions": ["notion_task_create", "task_breakdown_candidate"],
+    "write_policies": {"task": "create_only"}
+  },
+  "verification": {
+    "fixtures": ["tests/fixtures/agents/task_planner.examples.json"],
+    "unit_tests": ["tests/unit/test_agent_contracts.py"]
+  }
+}
+

@@ -1,0 +1,51 @@
+{
+  "name": "research_agent",
+  "status": "draft",
+  "purpose": "Research a question, collect sources, and produce a concise evidence-backed brief.",
+  "prompt": "prompts/agents/research_agent.md",
+  "inputs": [
+    {"name": "question", "type": "string", "required": true},
+    {"name": "scope", "type": "string", "required": false},
+    {"name": "deadline", "type": "string", "required": false}
+  ],
+  "outputs": [
+    {"name": "answer", "type": "string"},
+    {"name": "sources", "type": "array"},
+    {"name": "open_questions", "type": "array"},
+    {"name": "knowledge_handoff", "type": "object"}
+  ],
+  "tools": ["web_search", "web_extract", "memory", "knowledge_curator"],
+  "triggers": ["manual research request", "Project Manager research need", "Knowledge Curator gap"],
+  "workflow": [
+    "Clarify the research question when scope is too broad.",
+    "Collect primary or credible sources.",
+    "Summarize findings with uncertainty called out.",
+    "List open questions.",
+    "Hand durable findings to Knowledge Curator as candidates."
+  ],
+  "prompt_contract": {
+    "style": "source_grounded",
+    "default_action": "research_brief"
+  },
+  "safety_rules": [
+    "cite_sources_for_external_claims",
+    "distinguish_fact_from_inference",
+    "do_not_write_to_notion_without_handoff_confirmation"
+  ],
+  "future_improvements": [
+    "Add saved research projects.",
+    "Add recurring monitors for selected topics.",
+    "Add source quality scoring."
+  ],
+  "routing": {
+    "default_route": "research",
+    "allowed_routes": ["research"],
+    "allowed_actions": ["research_brief", "knowledge_candidate"],
+    "write_policies": {"research": "draft_only"}
+  },
+  "verification": {
+    "fixtures": ["tests/fixtures/agents/research_agent.examples.json"],
+    "unit_tests": ["tests/unit/test_agent_contracts.py"]
+  }
+}
+

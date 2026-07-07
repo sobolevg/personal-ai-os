@@ -1,0 +1,52 @@
+{
+  "name": "weekly_review",
+  "status": "draft",
+  "purpose": "Summarize the week, surface open loops, and prepare review suggestions without making bulk changes.",
+  "prompt": "prompts/agents/weekly_review.md",
+  "inputs": [
+    {"name": "week_range", "type": "string", "required": true},
+    {"name": "tasks_snapshot", "type": "array", "required": false},
+    {"name": "projects_snapshot", "type": "array", "required": false},
+    {"name": "inbox_snapshot", "type": "array", "required": false}
+  ],
+  "outputs": [
+    {"name": "weekly_summary", "type": "string"},
+    {"name": "open_loops", "type": "array"},
+    {"name": "suggested_focus", "type": "array"},
+    {"name": "proposed_changes", "type": "array"}
+  ],
+  "tools": ["notion.read_tasks", "notion.read_projects", "notion.create_review_note"],
+  "triggers": ["scheduled weekly review", "manual weekly review request"],
+  "workflow": [
+    "Read the weekly snapshot.",
+    "Separate completed work, open loops, and stale items.",
+    "Suggest focus areas for next week.",
+    "Create at most one review note when enabled.",
+    "Ask before modifying multiple tasks or projects."
+  ],
+  "prompt_contract": {
+    "style": "calm_review",
+    "default_action": "read_first"
+  },
+  "safety_rules": [
+    "do_not_bulk_update_tasks_without_confirmation",
+    "separate_facts_from_recommendations",
+    "archive_over_delete"
+  ],
+  "future_improvements": [
+    "Compare planned versus completed work.",
+    "Add energy and mood reflection prompts.",
+    "Auto-create next week focus after confirmation."
+  ],
+  "routing": {
+    "default_route": "review",
+    "allowed_routes": ["review"],
+    "allowed_actions": ["weekly_review_note", "weekly_review_suggestions"],
+    "write_policies": {"review": "draft_only"}
+  },
+  "verification": {
+    "fixtures": ["tests/fixtures/agents/weekly_review.examples.json"],
+    "unit_tests": ["tests/unit/test_agent_contracts.py"]
+  }
+}
+

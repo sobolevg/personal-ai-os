@@ -1,0 +1,15 @@
+[
+  {
+    "name": "ambiguous_note",
+    "input": {
+      "message": "idea for the weekly planning flow",
+      "source_platform": "telegram",
+      "source_message_id": "tg-inbox-1"
+    },
+    "expected": {
+      "candidate_type": "unclear",
+      "needs_confirmation": true
+    }
+  }
+]
+

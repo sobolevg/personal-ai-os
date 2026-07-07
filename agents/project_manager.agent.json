@@ -1,0 +1,51 @@
+{
+  "name": "project_manager",
+  "status": "draft",
+  "purpose": "Create and maintain project-level structure from confirmed goals and task clusters.",
+  "prompt": "prompts/agents/project_manager.md",
+  "inputs": [
+    {"name": "project_goal", "type": "string", "required": true},
+    {"name": "related_tasks", "type": "array", "required": false},
+    {"name": "area_hint", "type": "string", "required": false}
+  ],
+  "outputs": [
+    {"name": "project_candidate", "type": "object"},
+    {"name": "next_actions", "type": "array"},
+    {"name": "risks", "type": "array"},
+    {"name": "needs_confirmation", "type": "boolean"}
+  ],
+  "tools": ["notion.projects_candidate", "task_planner", "research_agent"],
+  "triggers": ["Project Creation automation", "manual project planning request", "Task Planner detects multi-step goal"],
+  "workflow": [
+    "Confirm the project outcome.",
+    "Identify initial next actions.",
+    "Suggest related area only when explicit.",
+    "Keep project creation as a candidate until confirmed.",
+    "Hand execution tasks to Task Planner."
+  ],
+  "prompt_contract": {
+    "style": "outcome_focused",
+    "default_action": "draft_only"
+  },
+  "safety_rules": [
+    "do_not_create_projects_from_single_unclear_tasks",
+    "do_not_move_existing_tasks_without_confirmation",
+    "do_not_redesign_notion_workspace"
+  ],
+  "future_improvements": [
+    "Infer project status from task progress.",
+    "Generate project review checklists.",
+    "Link projects to areas after contracts are complete."
+  ],
+  "routing": {
+    "default_route": "project",
+    "allowed_routes": ["project"],
+    "allowed_actions": ["project_candidate", "task_breakdown_candidate"],
+    "write_policies": {"project": "draft_only"}
+  },
+  "verification": {
+    "fixtures": ["tests/fixtures/agents/project_manager.examples.json"],
+    "unit_tests": ["tests/unit/test_agent_contracts.py"]
+  }
+}
+

@@ -1,2 +1,4 @@
 name: research_agent
-status: todo
+status: draft
+contract: agents/research_agent.agent.json
+prompt: prompts/agents/research_agent.md

@@ -1,0 +1,51 @@
+{
+  "name": "resource_importer",
+  "status": "draft",
+  "purpose": "Import links, books, movies, files, and other external resources as safe resource candidates.",
+  "prompt": "prompts/agents/resource_importer.md",
+  "inputs": [
+    {"name": "resource_reference", "type": "string", "required": true},
+    {"name": "resource_type_hint", "type": "string", "required": false},
+    {"name": "source_platform", "type": "string", "required": false}
+  ],
+  "outputs": [
+    {"name": "resource_type", "type": "enum", "values": ["url", "book", "movie", "file", "unknown"]},
+    {"name": "metadata", "type": "object"},
+    {"name": "source_url", "type": "string"},
+    {"name": "needs_confirmation", "type": "boolean"}
+  ],
+  "tools": ["web_extract", "google_drive", "notion.resources_candidate"],
+  "triggers": ["Resource Classification automation", "Book Import automation", "Movie Import automation", "Personal Assistant routes to resource"],
+  "workflow": [
+    "Detect the resource type.",
+    "Extract only reliable metadata.",
+    "Preserve the original reference.",
+    "Ask for confirmation when multiple matches are possible.",
+    "Return a draft candidate until the resource contract is filled."
+  ],
+  "prompt_contract": {
+    "style": "metadata_first",
+    "default_action": "draft_only"
+  },
+  "safety_rules": [
+    "do_not_guess_metadata_when_ambiguous",
+    "preserve_original_source",
+    "do_not_write_without_resource_contract"
+  ],
+  "future_improvements": [
+    "Add ISBN and movie database lookup.",
+    "Add duplicate detection.",
+    "Attach imported files from Google Drive."
+  ],
+  "routing": {
+    "default_route": "resource",
+    "allowed_routes": ["resource"],
+    "allowed_actions": ["resource_candidate"],
+    "write_policies": {"resource": "draft_only"}
+  },
+  "verification": {
+    "fixtures": ["tests/fixtures/agents/resource_importer.examples.json"],
+    "unit_tests": ["tests/unit/test_agent_contracts.py"]
+  }
+}
+

@@ -1,0 +1,12 @@
+[
+  {
+    "name": "research_question",
+    "input": {
+      "question": "What are safe rollout patterns for personal automations?"
+    },
+    "expected": {
+      "sources_required": true
+    }
+  }
+]
+

@@ -1,0 +1,12 @@
+[
+  {
+    "name": "project_goal",
+    "input": {
+      "project_goal": "Build Personal AI OS around Hermes"
+    },
+    "expected": {
+      "needs_confirmation": true
+    }
+  }
+]
+

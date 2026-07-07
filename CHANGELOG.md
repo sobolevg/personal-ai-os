@@ -17,6 +17,8 @@
 - Added safe dispatch plans for Telegram capture routing without new Notion
   writes for unfinished resource and expense contracts.
 - Added the first Personal Assistant agent contract with validation tests.
+- Added draft first-generation contracts and prompts for all eight planned
+  agents.
 
 ### Changed
 

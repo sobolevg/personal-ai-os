@@ -1,2 +1,4 @@
 name: inbox_processor
-status: todo
+status: draft
+contract: agents/inbox_processor.agent.json
+prompt: prompts/agents/inbox_processor.md

@@ -1,2 +1,4 @@
 name: knowledge_curator
-status: todo
+status: draft
+contract: agents/knowledge_curator.agent.json
+prompt: prompts/agents/knowledge_curator.md

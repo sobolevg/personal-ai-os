@@ -48,7 +48,7 @@ def validate_agent_contract(contract: AgentContract) -> None:
 
     _require_string(data, "name")
     _require_string(data, "status")
-    _require_string(data, "mission")
+    _require_string(data, "purpose")
     _require_string(data, "prompt")
 
     if data["status"] not in VALID_AGENT_STATUSES:
@@ -58,7 +58,11 @@ def validate_agent_contract(contract: AgentContract) -> None:
 
     _require_list(data, "inputs")
     _require_list(data, "outputs")
+    _require_list(data, "tools")
+    _require_list(data, "triggers")
+    _require_list(data, "workflow")
     _require_list(data, "safety_rules")
+    _require_list(data, "future_improvements")
     _require_dict(data, "routing")
     _require_dict(data, "verification")
 
@@ -96,4 +100,3 @@ def _require_list(data: dict[str, Any], key: str) -> None:
 def _require_dict(data: dict[str, Any], key: str) -> None:
     if not isinstance(data.get(key), dict) or not data[key]:
         raise AgentContractError(f"{key} must be a non-empty object")
-

@@ -1,6 +1,7 @@
 {
   "name": "personal_assistant",
   "status": "draft",
+  "purpose": "Act as the Personal AI OS front door for captured Telegram messages.",
   "mission": "Classify captured Telegram messages and choose the safest next Personal AI OS action.",
   "scope": [
     "first-pass message routing",
@@ -59,6 +60,23 @@
       "type": "boolean"
     }
   ],
+  "tools": [
+    "integrations.routing.capture_router.route_capture_message",
+    "integrations.routing.capture_dispatch.build_capture_dispatch_plan",
+    "notion_task_create"
+  ],
+  "triggers": [
+    "telegram text message",
+    "manual capture request"
+  ],
+  "workflow": [
+    "Normalize the incoming message.",
+    "Classify it into task, resource, expense, or inbox.",
+    "Choose the safest next action and write policy.",
+    "Preserve source platform and source message id.",
+    "Use notion_task_create only for high-confidence tasks.",
+    "Return candidate plans for unfinished resource, expense, and inbox workflows."
+  ],
   "routing": {
     "implementation": "integrations.routing.capture_dispatch.build_capture_dispatch_plan",
     "default_route": "inbox",
@@ -84,6 +102,11 @@
     "do_not_write_resource_or_expense_until_contracts_are_filled",
     "preserve_source_platform_and_message_id"
   ],
+  "future_improvements": [
+    "Add project relation extraction after project contracts are filled.",
+    "Add event log and idempotency keys before production automation.",
+    "Add richer confidence scoring from real Telegram examples."
+  ],
   "verification": {
     "fixtures": [
       "tests/fixtures/capture_router/examples.json",
@@ -96,4 +119,3 @@
     ]
   }
 }
-

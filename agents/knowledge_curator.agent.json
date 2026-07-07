@@ -1,0 +1,51 @@
+{
+  "name": "knowledge_curator",
+  "status": "draft",
+  "purpose": "Turn durable notes and research outputs into reviewable knowledge candidates.",
+  "prompt": "prompts/agents/knowledge_curator.md",
+  "inputs": [
+    {"name": "source_text", "type": "string", "required": true},
+    {"name": "source_url", "type": "string", "required": false},
+    {"name": "topic_hint", "type": "string", "required": false}
+  ],
+  "outputs": [
+    {"name": "summary", "type": "string"},
+    {"name": "knowledge_candidate", "type": "object"},
+    {"name": "links_to_existing_topics", "type": "array"},
+    {"name": "needs_confirmation", "type": "boolean"}
+  ],
+  "tools": ["memory", "notion.knowledge_candidate", "web_extract"],
+  "triggers": ["Knowledge Linking automation", "Research Agent handoff", "manual note curation"],
+  "workflow": [
+    "Identify durable ideas rather than temporary tasks.",
+    "Summarize the source without overclaiming.",
+    "Suggest likely topic links.",
+    "Keep uncertain links as suggestions.",
+    "Never reorganize the Notion workspace."
+  ],
+  "prompt_contract": {
+    "style": "evidence_first",
+    "default_action": "draft_only"
+  },
+  "safety_rules": [
+    "separate_facts_from_suggestions",
+    "do_not_overwrite_existing_notes_without_confirmation",
+    "preserve_source_links"
+  ],
+  "future_improvements": [
+    "Use embeddings or search for better topic linking.",
+    "Add periodic stale-note review.",
+    "Generate backlinks after Notion contracts are complete."
+  ],
+  "routing": {
+    "default_route": "knowledge",
+    "allowed_routes": ["knowledge"],
+    "allowed_actions": ["knowledge_candidate"],
+    "write_policies": {"knowledge": "draft_only"}
+  },
+  "verification": {
+    "fixtures": ["tests/fixtures/agents/knowledge_curator.examples.json"],
+    "unit_tests": ["tests/unit/test_agent_contracts.py"]
+  }
+}
+

@@ -1,0 +1,12 @@
+[
+  {
+    "name": "durable_note",
+    "input": {
+      "source_text": "Local-first agents need explicit contracts and rollback points."
+    },
+    "expected": {
+      "needs_confirmation": true
+    }
+  }
+]
+
