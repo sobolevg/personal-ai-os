@@ -1,5 +1,71 @@
 # Deployment Log
 
+## 2026-07-08 - Telegram Capture Dry-Plan Enablement
+
+Status: enabled for Telegram with execution blocked.
+
+Commit deployed:
+
+```text
+0149460 feat: gate telegram capture execution
+```
+
+Target:
+
+```text
+VPS host: hermes
+Checkout: /opt/personal-ai-os
+Hermes service: hermes-gateway.service
+Branch: phase3-capture-router-v1
+```
+
+Validation before enablement:
+
+- ran `python3 -m unittest discover` on the VPS: 37 tests OK
+- reinstalled `personal_ai_os_telegram_capture` bridge from repo-owned code
+- verified `personal_ai_os_capture` was defined in Hermes `toolsets.py`
+- verified `platform_toolsets.telegram` initially contained
+  `['hermes-telegram', 'notion_task']`
+
+Bridge reinstall backup:
+
+```text
+/root/.hermes/backups/personal-ai-os-telegram-capture-20260707T222513Z
+```
+
+Enablement:
+
+```text
+deploy/scripts/enable-telegram-capture-runtime.sh enable --apply
+systemctl restart hermes-gateway
+```
+
+Config backup:
+
+```text
+/root/.hermes/backups/personal-ai-os-telegram-capture-enable-20260707T222523Z
+```
+
+Post-restart validation:
+
+- `hermes-gateway.service` is active.
+- `platform_toolsets.telegram` now contains
+  `['hermes-telegram', 'notion_task', 'personal_ai_os_capture']`.
+- `PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED` is not enabled.
+- Direct dry-plan smoke returned route `task`, event status `planned`, and
+  `execution_event=None`.
+- Direct `execute=true` smoke returned a controlled error:
+  `execution is disabled; set PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED=1 on the server to allow writes`.
+- Smoke checks used a temporary event log under `/tmp` and did not write to
+  Notion.
+
+Rollback:
+
+```bash
+cp "/root/.hermes/backups/personal-ai-os-telegram-capture-enable-20260707T222523Z/config.yaml" "/root/.hermes/config.yaml"
+systemctl restart hermes-gateway
+```
+
 ## 2026-07-07 - Telegram Capture Runtime Bridge
 
 Status: deployed as Hermes bridge, not enabled for Telegram.

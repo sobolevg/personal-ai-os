@@ -48,6 +48,8 @@
   platform enablement.
 - Blocked Telegram capture execution unless
   `PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED=1` is set server-side.
+- Recorded Telegram dry-plan enablement for `personal_ai_os_capture` with
+  execution still blocked.
 
 ## v0.1.0-docs-baseline - 2026-07-06
 
