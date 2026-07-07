@@ -1,2 +1,4 @@
 name: book_import
-status: todo
+status: draft
+contract: automations/book_import.automation.json
+prompt: prompts/automations/book_import.md

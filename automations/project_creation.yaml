@@ -1,2 +1,4 @@
 name: project_creation
-status: todo
+status: draft
+contract: automations/project_creation.automation.json
+prompt: prompts/automations/project_creation.md

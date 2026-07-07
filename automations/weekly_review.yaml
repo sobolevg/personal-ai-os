@@ -1,2 +1,4 @@
 name: weekly_review
-status: todo
+status: draft
+contract: automations/weekly_review.automation.json
+prompt: prompts/automations/weekly_review.md

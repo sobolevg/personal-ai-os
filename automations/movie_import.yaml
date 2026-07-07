@@ -1,2 +1,4 @@
 name: movie_import
-status: todo
+status: draft
+contract: automations/movie_import.automation.json
+prompt: prompts/automations/movie_import.md

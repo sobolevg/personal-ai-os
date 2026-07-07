@@ -1,0 +1,2 @@
+[{"name": "telegram_task", "input": {"message": "todo: renew passport", "source_platform": "telegram", "source_message_id": "tg-auto-1"}, "expected": {"write_policy": "create_only"}}]
+

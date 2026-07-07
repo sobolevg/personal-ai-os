@@ -1,2 +1,4 @@
 name: voice_notes
-status: todo
+status: draft
+contract: automations/voice_notes.automation.json
+prompt: prompts/automations/voice_notes.md

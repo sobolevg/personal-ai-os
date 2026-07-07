@@ -1,2 +1,4 @@
 name: daily_planning
-status: todo
+status: draft
+contract: automations/daily_planning.automation.json
+prompt: prompts/automations/daily_planning.md

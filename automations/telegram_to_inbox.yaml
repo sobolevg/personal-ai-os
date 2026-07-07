@@ -1,5 +1,7 @@
 name: telegram_to_inbox
 status: draft
+contract: automations/telegram_to_inbox.automation.json
+prompt: prompts/automations/telegram_to_inbox.md
 entrypoint: integrations.routing.capture_dispatch.build_capture_dispatch_plan
 source:
   platform: telegram

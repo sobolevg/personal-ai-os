@@ -1,0 +1,26 @@
+{
+  "name": "resource_classification",
+  "status": "draft",
+  "purpose": "Classify captured resources and route them to the correct importer or knowledge flow.",
+  "prompt": "prompts/automations/resource_classification.md",
+  "inputs": [{"name": "resource_reference", "type": "string", "required": true}],
+  "outputs": [{"name": "resource_type", "type": "string"}, {"name": "next_automation", "type": "string"}],
+  "agents": ["resource_importer", "knowledge_curator"],
+  "tools": ["web_extract", "memory"],
+  "triggers": ["Personal Assistant routes to resource", "manual resource cleanup"],
+  "workflow": [
+    "Detect whether the resource is a URL, book, movie, file, or unknown.",
+    "Route books to Book Import.",
+    "Route movies to Movie Import.",
+    "Route durable notes to Knowledge Linking.",
+    "Keep unknown resources as candidates."
+  ],
+  "safety_rules": ["do_not_guess_when_ambiguous", "preserve_original_reference", "draft_only_until_resource_contract"],
+  "future_improvements": ["Add file type detection.", "Add OCR/vision handoff.", "Add duplicate detection."],
+  "execution": {"mode": "event_driven", "write_policy": "draft_only"},
+  "verification": {
+    "fixtures": ["tests/fixtures/automations/resource_classification.examples.json"],
+    "unit_tests": ["tests/unit/test_automation_contracts.py"]
+  }
+}
+

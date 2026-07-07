@@ -1,0 +1,26 @@
+{
+  "name": "movie_import",
+  "status": "draft",
+  "purpose": "Turn a movie reference into a reviewable entertainment/resource candidate.",
+  "prompt": "prompts/automations/movie_import.md",
+  "inputs": [{"name": "movie_reference", "type": "string", "required": true}],
+  "outputs": [{"name": "movie_candidate", "type": "object"}, {"name": "needs_confirmation", "type": "boolean"}],
+  "agents": ["resource_importer"],
+  "tools": ["web_search", "web_extract", "notion.entertainment_candidate"],
+  "triggers": ["manual movie import", "Personal Assistant routes movie-like resource"],
+  "workflow": [
+    "Parse movie title and optional year.",
+    "Look up candidate metadata.",
+    "Preserve source reference.",
+    "Ask for confirmation on ambiguous matches.",
+    "Keep writes draft-only until entertainment/resource contract is complete."
+  ],
+  "safety_rules": ["do_not_guess_movie_identity", "preserve_source_reference", "draft_only_until_contract"],
+  "future_improvements": ["Add TMDB or IMDb lookup.", "Detect watched versus want-to-watch intent.", "Add duplicate detection."],
+  "execution": {"mode": "manual_or_event_driven", "write_policy": "draft_only"},
+  "verification": {
+    "fixtures": ["tests/fixtures/automations/movie_import.examples.json"],
+    "unit_tests": ["tests/unit/test_automation_contracts.py"]
+  }
+}
+

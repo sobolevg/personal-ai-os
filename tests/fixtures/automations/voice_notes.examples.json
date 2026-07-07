@@ -1,0 +1,2 @@
+[{"name": "voice_note", "input": {"audio_reference": "telegram:file:voice-1", "source_message_id": "tg-voice-1"}, "expected": {"route_transcript": true}}]
+

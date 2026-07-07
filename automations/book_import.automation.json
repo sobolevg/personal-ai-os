@@ -1,0 +1,26 @@
+{
+  "name": "book_import",
+  "status": "draft",
+  "purpose": "Turn a book reference into a reviewable resource candidate.",
+  "prompt": "prompts/automations/book_import.md",
+  "inputs": [{"name": "book_reference", "type": "string", "required": true}],
+  "outputs": [{"name": "resource_candidate", "type": "object"}, {"name": "needs_confirmation", "type": "boolean"}],
+  "agents": ["resource_importer", "knowledge_curator"],
+  "tools": ["web_search", "web_extract", "notion.resources_candidate"],
+  "triggers": ["manual book import", "Personal Assistant routes book-like resource"],
+  "workflow": [
+    "Parse title, author, or ISBN from input.",
+    "Look up candidate metadata.",
+    "Preserve the original reference.",
+    "Ask for confirmation when multiple matches exist.",
+    "Create only a draft resource candidate until the resource contract is complete."
+  ],
+  "safety_rules": ["do_not_guess_book_metadata", "preserve_source_reference", "draft_only_until_resource_contract"],
+  "future_improvements": ["Add ISBN lookup provider.", "Add reading status mapping.", "Detect duplicates."],
+  "execution": {"mode": "manual_or_event_driven", "write_policy": "draft_only"},
+  "verification": {
+    "fixtures": ["tests/fixtures/automations/book_import.examples.json"],
+    "unit_tests": ["tests/unit/test_automation_contracts.py"]
+  }
+}
+

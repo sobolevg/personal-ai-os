@@ -1,0 +1,25 @@
+{
+  "name": "project_creation",
+  "status": "draft",
+  "purpose": "Create a project candidate from a confirmed multi-step goal.",
+  "prompt": "prompts/automations/project_creation.md",
+  "inputs": [{"name": "project_goal", "type": "string", "required": true}],
+  "outputs": [{"name": "project_candidate", "type": "object"}, {"name": "initial_tasks", "type": "array"}],
+  "agents": ["project_manager", "task_planner", "research_agent"],
+  "tools": ["notion.projects_candidate", "notion_task_create"],
+  "triggers": ["manual project creation", "Task Planner detects multi-step goal"],
+  "workflow": [
+    "Confirm project outcome.",
+    "Draft project candidate.",
+    "Suggest initial tasks.",
+    "Ask before creating relations or moving existing tasks."
+  ],
+  "safety_rules": ["do_not_create_projects_from_unclear_goals", "no_task_moves_without_confirmation", "draft_only_until_project_contract"],
+  "future_improvements": ["Add area relation support.", "Add project template selection.", "Add milestone generation."],
+  "execution": {"mode": "manual", "write_policy": "draft_only"},
+  "verification": {
+    "fixtures": ["tests/fixtures/automations/project_creation.examples.json"],
+    "unit_tests": ["tests/unit/test_automation_contracts.py"]
+  }
+}
+

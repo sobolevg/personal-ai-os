@@ -1,2 +1,4 @@
 name: task_breakdown
-status: todo
+status: draft
+contract: automations/task_breakdown.automation.json
+prompt: prompts/automations/task_breakdown.md

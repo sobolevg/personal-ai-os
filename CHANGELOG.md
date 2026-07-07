@@ -19,6 +19,8 @@
 - Added the first Personal Assistant agent contract with validation tests.
 - Added draft first-generation contracts and prompts for all eight planned
   agents.
+- Added draft first-generation contracts and prompts for all ten planned
+  automations.
 
 ### Changed
 

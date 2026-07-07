@@ -1,0 +1,5 @@
+name: knowledge_linking
+status: draft
+contract: automations/knowledge_linking.automation.json
+prompt: prompts/automations/knowledge_linking.md
+

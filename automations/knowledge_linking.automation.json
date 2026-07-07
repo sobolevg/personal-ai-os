@@ -1,0 +1,25 @@
+{
+  "name": "knowledge_linking",
+  "status": "draft",
+  "purpose": "Suggest links between knowledge candidates, resources, and existing topics.",
+  "prompt": "prompts/automations/knowledge_linking.md",
+  "inputs": [{"name": "knowledge_candidate", "type": "object", "required": true}],
+  "outputs": [{"name": "suggested_links", "type": "array"}, {"name": "needs_confirmation", "type": "boolean"}],
+  "agents": ["knowledge_curator", "research_agent"],
+  "tools": ["memory", "notion.knowledge_candidate"],
+  "triggers": ["new knowledge candidate", "manual knowledge cleanup"],
+  "workflow": [
+    "Read the candidate and available source context.",
+    "Suggest likely existing topics or resources.",
+    "Mark all links as suggestions.",
+    "Ask before writing backlinks."
+  ],
+  "safety_rules": ["do_not_overwrite_existing_notes", "suggest_links_do_not_apply_by_default", "preserve_sources"],
+  "future_improvements": ["Add semantic search.", "Add backlink write flow after confirmation.", "Add stale knowledge review."],
+  "execution": {"mode": "manual_or_event_driven", "write_policy": "draft_only"},
+  "verification": {
+    "fixtures": ["tests/fixtures/automations/knowledge_linking.examples.json"],
+    "unit_tests": ["tests/unit/test_automation_contracts.py"]
+  }
+}
+

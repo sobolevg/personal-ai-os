@@ -1,2 +1,4 @@
 name: resource_classification
-status: todo
+status: draft
+contract: automations/resource_classification.automation.json
+prompt: prompts/automations/resource_classification.md

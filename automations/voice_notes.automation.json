@@ -1,0 +1,25 @@
+{
+  "name": "voice_notes",
+  "status": "draft",
+  "purpose": "Transcribe voice notes and route the transcript into the capture flow.",
+  "prompt": "prompts/automations/voice_notes.md",
+  "inputs": [{"name": "audio_reference", "type": "string", "required": true}, {"name": "source_message_id", "type": "string", "required": true}],
+  "outputs": [{"name": "transcript", "type": "string"}, {"name": "dispatch_plan", "type": "object"}],
+  "agents": ["personal_assistant", "inbox_processor"],
+  "tools": ["transcription", "integrations.routing.capture_dispatch.build_capture_dispatch_plan"],
+  "triggers": ["telegram voice message received", "manual voice note replay"],
+  "workflow": [
+    "Transcribe the voice note.",
+    "Preserve transcript and source message id.",
+    "Route transcript through Personal Assistant.",
+    "Ask for confirmation on low-confidence transcripts."
+  ],
+  "safety_rules": ["preserve_raw_transcript", "low_confidence_transcripts_need_confirmation", "no_bulk_notion_edits"],
+  "future_improvements": ["Add speaker language detection.", "Attach original audio link.", "Add transcript quality scoring."],
+  "execution": {"mode": "event_driven", "write_policy": "draft_only"},
+  "verification": {
+    "fixtures": ["tests/fixtures/automations/voice_notes.examples.json"],
+    "unit_tests": ["tests/unit/test_automation_contracts.py"]
+  }
+}
+

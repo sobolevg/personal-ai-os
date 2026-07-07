@@ -1,0 +1,2 @@
+[{"name": "weekly_review", "input": {"week_range": "2026-07-06..2026-07-12"}, "expected": {"write_policy": "draft_only"}}]
+

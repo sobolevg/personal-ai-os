@@ -1,0 +1,25 @@
+{
+  "name": "task_breakdown",
+  "status": "draft",
+  "purpose": "Break a confirmed large task into smaller reviewable next actions.",
+  "prompt": "prompts/automations/task_breakdown.md",
+  "inputs": [{"name": "task_title", "type": "string", "required": true}],
+  "outputs": [{"name": "subtasks", "type": "array"}, {"name": "needs_confirmation", "type": "boolean"}],
+  "agents": ["task_planner", "project_manager"],
+  "tools": ["notion_task_create"],
+  "triggers": ["manual task breakdown", "Task Planner detects large task"],
+  "workflow": [
+    "Check whether breakdown is needed.",
+    "Draft small next actions.",
+    "Keep generated tasks as suggestions until confirmed.",
+    "Create tasks only after confirmation."
+  ],
+  "safety_rules": ["do_not_create_many_tasks_without_confirmation", "keep_subtasks_actionable", "do_not_invent_project_context"],
+  "future_improvements": ["Add effort estimates.", "Add dependency ordering.", "Add project relation after contracts are complete."],
+  "execution": {"mode": "manual_or_event_driven", "write_policy": "draft_only"},
+  "verification": {
+    "fixtures": ["tests/fixtures/automations/task_breakdown.examples.json"],
+    "unit_tests": ["tests/unit/test_automation_contracts.py"]
+  }
+}
+

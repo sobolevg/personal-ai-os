@@ -1,0 +1,25 @@
+{
+  "name": "daily_planning",
+  "status": "draft",
+  "purpose": "Produce a focused daily plan from today, weekly, project, and inbox signals.",
+  "prompt": "prompts/automations/daily_planning.md",
+  "inputs": [{"name": "date", "type": "string", "required": true}],
+  "outputs": [{"name": "daily_plan", "type": "object"}, {"name": "suggested_task_moves", "type": "array"}],
+  "agents": ["task_planner", "weekly_review", "personal_assistant"],
+  "tools": ["notion.read_tasks", "notion.read_projects"],
+  "triggers": ["scheduled morning planning", "manual daily planning"],
+  "workflow": [
+    "Read today and week task buckets.",
+    "Read active project hints.",
+    "Suggest a small daily focus list.",
+    "Keep task moves as proposals unless confirmed."
+  ],
+  "safety_rules": ["do_not_invent_deadlines", "no_bulk_task_moves_without_confirmation", "keep_plan_small"],
+  "future_improvements": ["Add calendar awareness.", "Add energy and time budget.", "Add end-of-day review handoff."],
+  "execution": {"mode": "scheduled_or_manual", "write_policy": "read_only"},
+  "verification": {
+    "fixtures": ["tests/fixtures/automations/daily_planning.examples.json"],
+    "unit_tests": ["tests/unit/test_automation_contracts.py"]
+  }
+}
+
