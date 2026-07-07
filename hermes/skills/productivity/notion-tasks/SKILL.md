@@ -17,11 +17,47 @@ Examples:
 
 ## Required Tool Routing
 
+### Telegram capture path
+
+For ordinary Telegram task/capture messages from Evgenii, use:
+
+```text
+personal_ai_os_telegram_capture
+```
+
+Call it with:
+
+- `message`: the raw Telegram message text
+- `source_message_id`: the stable Telegram message id from the platform context
+- `execute`: `false`
+
+This is the default path for messages such as:
+
+- `todo: купить лампочки`
+- `task: renew passport`
+- `задача: проверить страховку`
+- `добавь задачу ...`
+- `запиши задачу ...`
+- `на потом ...`
+
+The capture tool writes only a planned event while
+`PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED` is unset. It must be preferred over
+direct task creation for Telegram capture until runtime execution is explicitly
+enabled.
+
+Do not use `terminal`, `execute_code`, raw Notion MCP, or Hermes internal `todo`
+for ordinary Telegram task/capture messages.
+
+### Direct task creation path
+
 For personal task capture, use the native Hermes tool:
 
 ```text
 notion_task_create
 ```
+
+Use `notion_task_create` only when a direct Notion task write is explicitly
+intended and the request is not part of the Telegram dry-plan capture rollout.
 
 Do not create personal tasks with generic Notion MCP page creation tools when
 `notion_task_create` is available.

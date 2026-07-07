@@ -53,6 +53,8 @@
 - Recorded Telegram native-tool smoke results: explicit
   `personal_ai_os_telegram_capture` works, automatic task routing is still
   pending.
+- Updated the `notion-tasks` Hermes skill to route ordinary Telegram task
+  captures to `personal_ai_os_telegram_capture` with `execute=false`.
 
 ## v0.1.0-docs-baseline - 2026-07-06
 

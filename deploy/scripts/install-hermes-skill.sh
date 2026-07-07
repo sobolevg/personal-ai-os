@@ -46,7 +46,11 @@ verify_source() {
     echo "Skill does not mention notion_task_create: $SOURCE_DIR/SKILL.md" >&2
     exit 1
   fi
-  echo "OK: source skill routes task capture to notion_task_create"
+  if ! grep -q "personal_ai_os_telegram_capture" "$SOURCE_DIR/SKILL.md"; then
+    echo "Skill does not mention personal_ai_os_telegram_capture: $SOURCE_DIR/SKILL.md" >&2
+    exit 1
+  fi
+  echo "OK: source skill routes Telegram capture to personal_ai_os_telegram_capture"
 }
 
 verify_installed() {
@@ -59,7 +63,11 @@ verify_installed() {
     echo "Installed skill does not mention notion_task_create: $TARGET_DIR/SKILL.md" >&2
     exit 1
   fi
-  echo "OK: installed skill routes task capture to notion_task_create"
+  if ! grep -q "personal_ai_os_telegram_capture" "$TARGET_DIR/SKILL.md"; then
+    echo "Installed skill does not mention personal_ai_os_telegram_capture: $TARGET_DIR/SKILL.md" >&2
+    exit 1
+  fi
+  echo "OK: installed skill routes Telegram capture to personal_ai_os_telegram_capture"
 }
 
 plan() {
