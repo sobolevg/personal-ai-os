@@ -42,7 +42,7 @@ verify_source() {
     echo "Missing required file: $SOURCE_DIR/SKILL.md" >&2
     exit 1
   fi
-  if ! grep -q "notion_task_create" "$SOURCE_DIR/SKILL.md"; then
+  if [[ "$SKILL_NAME" == "notion-tasks" ]] && ! grep -q "notion_task_create" "$SOURCE_DIR/SKILL.md"; then
     echo "Skill does not mention notion_task_create: $SOURCE_DIR/SKILL.md" >&2
     exit 1
   fi
@@ -59,7 +59,7 @@ verify_installed() {
     echo "Missing installed skill file: $TARGET_DIR/SKILL.md" >&2
     exit 1
   fi
-  if ! grep -q "notion_task_create" "$TARGET_DIR/SKILL.md"; then
+  if [[ "$SKILL_NAME" == "notion-tasks" ]] && ! grep -q "notion_task_create" "$TARGET_DIR/SKILL.md"; then
     echo "Installed skill does not mention notion_task_create: $TARGET_DIR/SKILL.md" >&2
     exit 1
   fi
