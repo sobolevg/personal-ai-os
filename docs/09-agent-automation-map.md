@@ -32,11 +32,13 @@ Implemented as local foundations, not deployed:
 - task execution path for high-confidence Telegram captures, with executed or
   failed outcome events
 - event log path management script for install, backup, and rotation
+- Hermes bridge for `personal_ai_os_telegram_capture`, behind a separate
+  `personal_ai_os_capture` toolset
 
 Not implemented yet:
 
-- production Telegram automation wrapper
-- VPS deployment of the Telegram automation wrapper
+- VPS deployment of the Telegram capture runtime wrapper
+- Telegram platform enablement for `personal_ai_os_capture`
 - Notion write contracts beyond tasks
 - confirmation UI for ambiguous captures
 - VPS deploy for the Phase 3 design layer
@@ -45,7 +47,7 @@ Not implemented yet:
 
 | Agent | Status | Primary role | Runtime readiness |
 | --- | --- | --- | --- |
-| Personal Assistant | draft | Front door for Telegram capture routing | Partially ready: router and dispatch are tested |
+| Personal Assistant | draft | Front door for Telegram capture routing | Partially ready: router, dispatch, event log, and Hermes wrapper are tested |
 | Inbox Processor | draft | Convert ambiguous captures into reviewable candidates | Design only |
 | Task Planner | draft | Normalize tasks, suggest buckets and breakdowns | Partially ready through `notion_task_create` |
 | Knowledge Curator | draft | Turn durable notes and research into knowledge candidates | Design only |
@@ -58,7 +60,7 @@ Not implemented yet:
 
 | Automation | Status | Agents | Write policy | Runtime readiness |
 | --- | --- | --- | --- | --- |
-| Telegram To Inbox | draft | Personal Assistant, Inbox Processor, Task Planner, Resource Importer | `create_only` for high-confidence tasks; draft for unfinished paths | Best first runtime candidate |
+| Telegram To Inbox | draft | Personal Assistant, Inbox Processor, Task Planner, Resource Importer | `create_only` for high-confidence tasks; draft for unfinished paths | Runtime wrapper prepared; Telegram enablement pending |
 | Voice Notes | draft | Personal Assistant, Inbox Processor | `draft_only` | Needs transcription path |
 | Daily Planning | draft | Task Planner, Weekly Review, Personal Assistant | `read_only` | Needs Notion read contracts |
 | Weekly Review | draft | Weekly Review, Task Planner, Project Manager | `draft_only` | Needs Notion read contracts |
@@ -106,9 +108,11 @@ Before enabling broader runtime automation:
 1. Wrap `Telegram To Inbox` around the existing dispatch plan.
 2. Record planned events before writes.
 3. Block duplicate events by idempotency key.
-4. Deploy the wrapper to Hermes behind the existing `notion_task` toolset.
-5. Add confirmation/draft handling for resource, expense, and inbox paths.
-6. Tag a design checkpoint before any VPS deploy.
+4. Deploy the wrapper to Hermes behind the separate `personal_ai_os_capture`
+   toolset.
+5. Enable `personal_ai_os_capture` for Telegram after dry-plan validation.
+6. Add confirmation/draft handling for resource, expense, and inbox paths.
+7. Tag a runtime checkpoint after VPS deploy verification.
 
 ## Checkpoint Criteria
 

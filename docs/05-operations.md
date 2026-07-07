@@ -68,3 +68,23 @@ deploy/scripts/manage-event-log.sh rotate --apply
 Rotation backs up the current JSONL file under `/root/.hermes/backups` before
 truncating it. The default rotation threshold is `10485760` bytes and can be
 changed with `MAX_BYTES`.
+
+## Telegram Capture Runtime
+
+Install or verify the prepared Hermes bridge with:
+
+```bash
+deploy/scripts/install-telegram-capture-runtime.sh plan
+deploy/scripts/install-telegram-capture-runtime.sh verify
+deploy/scripts/install-telegram-capture-runtime.sh install --apply
+```
+
+This only installs the `personal_ai_os_telegram_capture` bridge and
+`personal_ai_os_capture` toolset. It does not enable the toolset for Telegram.
+
+Before activation, confirm:
+
+- event log path is installed and valid
+- Hermes imports the bridge without errors
+- rollback command from the install output is saved
+- `platform_toolsets.telegram` change is intentional and reviewed

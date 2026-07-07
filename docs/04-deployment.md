@@ -72,6 +72,22 @@ Default path:
 
 The script does not restart Hermes and does not write to Notion.
 
+## Telegram Capture Runtime Install
+
+The prepared install path for the Telegram capture runtime is documented in
+`docs/10-telegram-capture-runtime-install.md`.
+
+Use:
+
+```bash
+deploy/scripts/install-telegram-capture-runtime.sh plan
+deploy/scripts/install-telegram-capture-runtime.sh verify
+deploy/scripts/install-telegram-capture-runtime.sh install --apply
+```
+
+The script installs the Hermes bridge and `personal_ai_os_capture` toolset, but
+does not restart Hermes, write to Notion, or enable the toolset for Telegram.
+
 ## Deployment Log
 
 Deployment history is tracked in `docs/08-deployment-log.md`.
