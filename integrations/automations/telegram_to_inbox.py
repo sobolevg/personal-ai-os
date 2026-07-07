@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from dataclasses import replace
 import json
 import os
 from pathlib import Path
 from typing import Any, Callable
 
+from integrations.agents.knowledge_curator import curate_knowledge_candidate
 from integrations.events.event_log import (
     JsonlEventStore,
     PersonalAIEvent,
@@ -16,6 +18,7 @@ from integrations.events.event_log import (
 from integrations.notion.task_capture import DEFAULT_BUCKET
 from integrations.routing.capture_dispatch import (
     ACTION_NOTION_TASK_CREATE,
+    ACTION_KNOWLEDGE_CANDIDATE,
     WRITE_CREATE_ONLY,
     CaptureDispatchPlan,
     build_capture_dispatch_plan,
@@ -63,7 +66,7 @@ def plan_telegram_capture(
         source_platform=source_platform,
         source_message_id=source_message_id,
     )
-    planned_event = plan_event_from_dispatch(dispatch_plan)
+    planned_event = _event_from_dispatch_with_agent_draft(dispatch_plan)
     event_store = JsonlEventStore(resolve_event_store_path(event_store_path))
     recorded_event = event_store.record_event(planned_event)
     should_execute_action = _should_execute_action(dispatch_plan, recorded_event)
@@ -170,6 +173,24 @@ def _should_execute_action(
         dispatch_plan.action == ACTION_NOTION_TASK_CREATE
         and dispatch_plan.write_policy == WRITE_CREATE_ONLY
         and not dispatch_plan.needs_confirmation
+    )
+
+
+def _event_from_dispatch_with_agent_draft(
+    dispatch_plan: CaptureDispatchPlan,
+) -> PersonalAIEvent:
+    event = plan_event_from_dispatch(dispatch_plan)
+    if dispatch_plan.action != ACTION_KNOWLEDGE_CANDIDATE:
+        return event
+
+    draft = curate_knowledge_candidate(dispatch_plan.normalized_text)
+    return replace(
+        event,
+        metadata={
+            **event.metadata,
+            "agent": "knowledge_curator",
+            "knowledge_candidate": draft.to_dict(),
+        },
     )
 
 

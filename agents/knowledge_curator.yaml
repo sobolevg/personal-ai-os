@@ -1,4 +1,4 @@
 name: knowledge_curator
-status: draft
+status: partial_runtime
 contract: agents/knowledge_curator.agent.json
 prompt: prompts/agents/knowledge_curator.md

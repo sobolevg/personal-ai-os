@@ -38,7 +38,7 @@
     {
       "name": "route",
       "type": "enum",
-      "values": ["task", "resource", "expense", "inbox"]
+      "values": ["task", "resource", "expense", "knowledge", "inbox"]
     },
     {
       "name": "action",
@@ -47,6 +47,7 @@
         "notion_task_create",
         "resource_candidate",
         "expense_candidate",
+        "knowledge_candidate",
         "inbox_candidate"
       ]
     },
@@ -71,26 +72,28 @@
   ],
   "workflow": [
     "Normalize the incoming message.",
-    "Classify it into task, resource, expense, or inbox.",
+    "Classify it into task, resource, expense, knowledge, or inbox.",
     "Choose the safest next action and write policy.",
     "Preserve source platform and source message id.",
     "Use notion_task_create only for high-confidence tasks.",
-    "Return candidate plans for unfinished resource, expense, and inbox workflows."
+    "Return candidate plans for unfinished resource, expense, knowledge, and inbox workflows."
   ],
   "routing": {
     "implementation": "integrations.routing.capture_dispatch.build_capture_dispatch_plan",
     "default_route": "inbox",
-    "allowed_routes": ["task", "resource", "expense", "inbox"],
+    "allowed_routes": ["task", "resource", "expense", "knowledge", "inbox"],
     "allowed_actions": [
       "notion_task_create",
       "resource_candidate",
       "expense_candidate",
+      "knowledge_candidate",
       "inbox_candidate"
     ],
     "write_policies": {
       "task": "create_only",
       "resource": "draft_only",
       "expense": "draft_only",
+      "knowledge": "draft_only",
       "inbox": "draft_only"
     }
   },
@@ -104,7 +107,7 @@
   ],
   "future_improvements": [
     "Add project relation extraction after project contracts are filled.",
-    "Add event log and idempotency keys before production automation.",
+    "Add live Knowledge Curator execution from planned knowledge events.",
     "Add richer confidence scoring from real Telegram examples."
   ],
   "verification": {

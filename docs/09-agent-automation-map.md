@@ -21,6 +21,8 @@ Implemented in git:
 - agent contract validator and catalog tests
 - automation contract validator and catalog tests
 - deterministic capture router and dispatch plan tests
+- Knowledge Curator draft runtime for durable notes and research-needed
+  knowledge candidates
 - Hermes native `notion_task_create` bridge for task creation
 
 Implemented as local foundations:
@@ -61,7 +63,7 @@ Not implemented yet:
 | Personal Assistant | draft | Front door for Telegram capture routing | Partially ready: router, dispatch, event log, and Hermes wrapper are tested |
 | Inbox Processor | draft | Convert ambiguous captures into reviewable candidates | Design only |
 | Task Planner | draft | Normalize tasks, suggest buckets and breakdowns | Partially ready through `notion_task_create` |
-| Knowledge Curator | draft | Turn durable notes and research into knowledge candidates | Design only |
+| Knowledge Curator | partial runtime | Turn durable notes and research into knowledge candidates | Produces draft-only structured knowledge candidates from Telegram capture metadata |
 | Resource Importer | draft | Import URLs, books, movies, and files as resource candidates | Design only |
 | Weekly Review | draft | Summarize weekly snapshots and propose focus | Design only |
 | Research Agent | draft | Produce source-backed briefs and hand off durable findings | Design only |
@@ -71,7 +73,7 @@ Not implemented yet:
 
 | Automation | Status | Agents | Write policy | Runtime readiness |
 | --- | --- | --- | --- | --- |
-| Telegram To Inbox | draft | Personal Assistant, Inbox Processor, Task Planner, Resource Importer | `create_only` for high-confidence tasks; draft for unfinished paths | Ordinary Telegram dry-plan routing passed; pending review tooling added; writes still disabled |
+| Telegram To Inbox | draft | Personal Assistant, Inbox Processor, Task Planner, Knowledge Curator, Resource Importer | `create_only` for high-confidence tasks; draft for unfinished paths | Ordinary Telegram dry-plan routing passed; knowledge notes now get structured draft metadata; writes still disabled |
 | Voice Notes | draft | Personal Assistant, Inbox Processor | `draft_only` | Needs transcription path |
 | Daily Planning | draft | Task Planner, Weekly Review, Personal Assistant | `read_only` | Needs Notion read contracts |
 | Weekly Review | draft | Weekly Review, Task Planner, Project Manager | `draft_only` | Needs Notion read contracts |
@@ -92,6 +94,7 @@ Telegram message
   -> capture router
   -> capture dispatch plan
   -> if high-confidence task: notion_task_create
+  -> if durable note: Knowledge Curator draft candidate
   -> else: draft candidate / confirmation path
 ```
 
@@ -100,7 +103,8 @@ Why this path first:
 - Hermes already exposes `notion_task_create` to Telegram.
 - The task Notion contract is the only write contract filled enough for direct
   creation.
-- The router and dispatch plan are covered by fixtures and unit tests.
+- The router, dispatch plan, and Knowledge Curator draft runtime are covered by
+  fixtures and unit tests.
 - The path preserves source platform and message id, which is required for the
   next event-log step.
 
@@ -116,11 +120,12 @@ Before enabling broader runtime automation:
 
 ## Next Build Steps
 
-1. Add confirmation/draft handling for resource, expense, and inbox paths.
-2. Add execution flow from reviewed planned captures.
-3. Decide when to enable Notion task writes through the server-side execution
+1. Deploy and smoke test Knowledge Curator dry-plan routing from Telegram.
+2. Add confirmation/draft handling for resource, expense, and inbox paths.
+3. Add execution flow from reviewed planned captures.
+4. Decide when to enable Notion task writes through the server-side execution
    flags.
-4. Tag a runtime checkpoint after reviewed execution verification.
+5. Tag a runtime checkpoint after reviewed execution verification.
 
 ## Checkpoint Criteria
 

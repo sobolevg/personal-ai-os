@@ -39,17 +39,16 @@
     }
   },
   {
-    "name": "ambiguous_note_needs_confirmation",
+    "name": "knowledge_note_stays_draft_until_contract_exists",
     "message": "идея для будущей системы с недельными обзорами",
     "source_platform": "telegram",
     "source_message_id": "tg-1004",
     "expected": {
-      "route": "inbox",
-      "action": "inbox_candidate",
+      "route": "knowledge",
+      "action": "knowledge_candidate",
       "write_policy": "draft_only",
-      "needs_confirmation": true,
-      "target": null
+      "needs_confirmation": false,
+      "target": "notion.knowledge"
     }
   }
 ]
-

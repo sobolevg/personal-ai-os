@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-VALID_AGENT_STATUSES = ("draft", "active")
+VALID_AGENT_STATUSES = ("draft", "partial_runtime", "active")
 VALID_WRITE_POLICIES = ("create_only", "draft_only", "read_only")
 
 

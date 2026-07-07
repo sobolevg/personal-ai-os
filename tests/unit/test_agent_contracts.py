@@ -20,6 +20,8 @@ EXPECTED_AGENTS = {
     "personal_assistant",
 }
 
+ALLOWED_AGENT_STATUSES = {"draft", "partial_runtime"}
+
 
 class AgentContractsCatalogTest(unittest.TestCase):
     def test_all_first_generation_agents_have_valid_contracts(self) -> None:
@@ -32,6 +34,7 @@ class AgentContractsCatalogTest(unittest.TestCase):
             with self.subTest(agent=contract_path.name):
                 contract = load_agent_contract(contract_path)
                 self.assertIn(contract.name, EXPECTED_AGENTS)
+                self.assertIn(contract.data["status"], ALLOWED_AGENT_STATUSES)
 
                 self.assertTrue((REPO_ROOT / contract.data["prompt"]).exists())
 
@@ -53,7 +56,12 @@ class AgentContractsCatalogTest(unittest.TestCase):
                 self.assertTrue(yaml_path.exists())
                 yaml_text = yaml_path.read_text(encoding="utf-8")
 
-                self.assertIn("status: draft", yaml_text)
+                self.assertTrue(
+                    any(
+                        f"status: {status}" in yaml_text
+                        for status in ALLOWED_AGENT_STATUSES
+                    )
+                )
                 self.assertIn(f"contract: agents/{agent_name}.agent.json", yaml_text)
                 self.assertTrue(contract_path.exists())
 

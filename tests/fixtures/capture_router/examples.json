@@ -66,9 +66,18 @@
     "name": "unknown_note",
     "message": "идея для будущей системы с недельными обзорами",
     "expected": {
-      "route": "inbox",
-      "confidence": "low",
-      "target": null
+      "route": "knowledge",
+      "confidence": "medium",
+      "target": "notion.knowledge"
+    }
+  },
+  {
+    "name": "thinking_note_ru",
+    "message": "подумать над personal ai os как системой агентов вокруг Hermes",
+    "expected": {
+      "route": "knowledge",
+      "confidence": "medium",
+      "target": "notion.knowledge"
     }
   },
   {

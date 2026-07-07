@@ -8,9 +8,10 @@ import re
 ROUTE_TASK = "task"
 ROUTE_RESOURCE = "resource"
 ROUTE_EXPENSE = "expense"
+ROUTE_KNOWLEDGE = "knowledge"
 ROUTE_INBOX = "inbox"
 
-VALID_ROUTES = (ROUTE_TASK, ROUTE_RESOURCE, ROUTE_EXPENSE, ROUTE_INBOX)
+VALID_ROUTES = (ROUTE_TASK, ROUTE_RESOURCE, ROUTE_EXPENSE, ROUTE_KNOWLEDGE, ROUTE_INBOX)
 
 URL_RE = re.compile(r"https?://\S+|www\.\S+", re.IGNORECASE)
 MONEY_RE = re.compile(
@@ -40,6 +41,20 @@ RESOURCE_MARKERS = (
     "сохрани ссылку",
     "save link",
     "read later",
+)
+
+KNOWLEDGE_MARKERS = (
+    "knowledge:",
+    "note:",
+    "idea:",
+    "мысль:",
+    "идея:",
+    "идея ",
+    "заметка:",
+    "заметка ",
+    "подумать",
+    "think about",
+    "research idea",
 )
 
 EXPENSE_MARKERS = (
@@ -85,6 +100,7 @@ def route_capture_message(message: str | None) -> CaptureRoute:
     has_money = bool(MONEY_RE.search(normalized_text))
     task_marker = _first_marker(lowered, TASK_MARKERS)
     resource_marker = _first_marker(lowered, RESOURCE_MARKERS)
+    knowledge_marker = _first_marker(lowered, KNOWLEDGE_MARKERS)
     expense_marker = _first_marker(lowered, EXPENSE_MARKERS)
 
     if expense_marker:
@@ -95,6 +111,8 @@ def route_capture_message(message: str | None) -> CaptureRoute:
         signals.append(f"task_marker:{task_marker}")
     if resource_marker:
         signals.append(f"resource_marker:{resource_marker}")
+    if knowledge_marker:
+        signals.append(f"knowledge_marker:{knowledge_marker}")
     if has_url:
         signals.append("url")
 
@@ -114,6 +132,15 @@ def route_capture_message(message: str | None) -> CaptureRoute:
             normalized_text=normalized_text,
             signals=tuple(signals),
             target="notion.tasks",
+        )
+
+    if knowledge_marker:
+        return CaptureRoute(
+            route=ROUTE_KNOWLEDGE,
+            confidence="medium",
+            normalized_text=normalized_text,
+            signals=tuple(signals),
+            target="notion.knowledge",
         )
 
     if has_url or resource_marker:

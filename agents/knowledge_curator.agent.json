@@ -1,6 +1,6 @@
 {
   "name": "knowledge_curator",
-  "status": "draft",
+  "status": "partial_runtime",
   "purpose": "Turn durable notes and research outputs into reviewable knowledge candidates.",
   "prompt": "prompts/agents/knowledge_curator.md",
   "inputs": [
@@ -14,7 +14,12 @@
     {"name": "links_to_existing_topics", "type": "array"},
     {"name": "needs_confirmation", "type": "boolean"}
   ],
-  "tools": ["memory", "notion.knowledge_candidate", "web_extract"],
+  "tools": [
+    "integrations.agents.knowledge_curator.curate_knowledge_candidate",
+    "memory",
+    "notion.knowledge_candidate",
+    "web_extract"
+  ],
   "triggers": ["Knowledge Linking automation", "Research Agent handoff", "manual note curation"],
   "workflow": [
     "Identify durable ideas rather than temporary tasks.",
@@ -45,7 +50,9 @@
   },
   "verification": {
     "fixtures": ["tests/fixtures/agents/knowledge_curator.examples.json"],
-    "unit_tests": ["tests/unit/test_agent_contracts.py"]
+    "unit_tests": [
+      "tests/unit/test_agent_contracts.py",
+      "tests/unit/test_knowledge_curator_runtime.py"
+    ]
   }
 }
-

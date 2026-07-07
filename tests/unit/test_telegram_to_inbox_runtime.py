@@ -83,6 +83,30 @@ class TelegramToInboxRuntimeTest(unittest.TestCase):
             self.assertEqual(result.should_execute_action, expected["should_execute_action"])
             self.assertEqual(result.confirmation_text, expected["confirmation_text"])
 
+    def test_knowledge_capture_records_agent_draft(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            event_store_path = Path(tmp_dir) / "events.jsonl"
+            result = plan_telegram_capture(
+                message="подумать над personal ai os как системой агентов вокруг Hermes",
+                source_message_id="tg-runtime-knowledge-1",
+                event_store_path=event_store_path,
+            )
+            events = JsonlEventStore(event_store_path).iter_events()
+
+            self.assertEqual(result.dispatch_plan.route, "knowledge")
+            self.assertEqual(result.dispatch_plan.action, "knowledge_candidate")
+            self.assertFalse(result.should_execute_action)
+            self.assertEqual(result.confirmation_text, "Captured as a draft candidate.")
+            self.assertEqual(events[0]["metadata"]["agent"], "knowledge_curator")
+            self.assertEqual(
+                events[0]["metadata"]["knowledge_candidate"]["target"],
+                "notion.knowledge",
+            )
+            self.assertIn(
+                "Personal AI OS",
+                events[0]["metadata"]["knowledge_candidate"]["links_to_existing_topics"],
+            )
+
     def test_execute_high_confidence_task_records_executed_event(self) -> None:
         expected = _load_expected("executed")
         calls = []

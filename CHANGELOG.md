@@ -34,6 +34,8 @@
   `platform_toolsets.telegram`.
 - Added read-only event log review tooling for summaries and pending planned
   captures.
+- Added a draft-only Knowledge Curator runtime and routed durable note captures
+  to `knowledge_candidate` events.
 
 ### Changed
 
@@ -61,6 +63,8 @@
   `PERSONAL_AI_OS_NOTION_TASK_CREATE_ENABLED=1` is set server-side.
 - Removed direct `notion_task_create` from Telegram dry-plan tools and recorded
   an ordinary Telegram `todo:` dry-plan smoke test.
+- Updated Personal Assistant routing to recognize knowledge notes separately
+  from generic inbox captures.
 
 ## v0.1.0-docs-baseline - 2026-07-06
 
