@@ -16,6 +16,7 @@
   expense, and inbox routing.
 - Added safe dispatch plans for Telegram capture routing without new Notion
   writes for unfinished resource and expense contracts.
+- Added the first Personal Assistant agent contract with validation tests.
 
 ### Changed
 

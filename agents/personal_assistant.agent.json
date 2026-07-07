@@ -1,0 +1,99 @@
+{
+  "name": "personal_assistant",
+  "status": "draft",
+  "mission": "Classify captured Telegram messages and choose the safest next Personal AI OS action.",
+  "scope": [
+    "first-pass message routing",
+    "safe dispatch plan selection",
+    "source metadata preservation",
+    "low-confidence fallback to inbox"
+  ],
+  "non_goals": [
+    "Notion workspace redesign",
+    "bulk Notion edits",
+    "direct writes to unfinished resource or expense contracts",
+    "Hermes internal todo storage"
+  ],
+  "prompt": "prompts/agents/personal_assistant_router.md",
+  "inputs": [
+    {
+      "name": "message",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "source_platform",
+      "type": "string",
+      "required": true,
+      "default": "telegram"
+    },
+    {
+      "name": "source_message_id",
+      "type": "string",
+      "required": true
+    }
+  ],
+  "outputs": [
+    {
+      "name": "route",
+      "type": "enum",
+      "values": ["task", "resource", "expense", "inbox"]
+    },
+    {
+      "name": "action",
+      "type": "enum",
+      "values": [
+        "notion_task_create",
+        "resource_candidate",
+        "expense_candidate",
+        "inbox_candidate"
+      ]
+    },
+    {
+      "name": "write_policy",
+      "type": "enum",
+      "values": ["create_only", "draft_only"]
+    },
+    {
+      "name": "needs_confirmation",
+      "type": "boolean"
+    }
+  ],
+  "routing": {
+    "implementation": "integrations.routing.capture_dispatch.build_capture_dispatch_plan",
+    "default_route": "inbox",
+    "allowed_routes": ["task", "resource", "expense", "inbox"],
+    "allowed_actions": [
+      "notion_task_create",
+      "resource_candidate",
+      "expense_candidate",
+      "inbox_candidate"
+    ],
+    "write_policies": {
+      "task": "create_only",
+      "resource": "draft_only",
+      "expense": "draft_only",
+      "inbox": "draft_only"
+    }
+  },
+  "safety_rules": [
+    "never_route_to_internal_hermes_todo",
+    "prefer_inbox_when_unclear",
+    "do_not_redesign_notion_workspace",
+    "do_not_bulk_edit_notion_without_confirmation",
+    "do_not_write_resource_or_expense_until_contracts_are_filled",
+    "preserve_source_platform_and_message_id"
+  ],
+  "verification": {
+    "fixtures": [
+      "tests/fixtures/capture_router/examples.json",
+      "tests/fixtures/capture_router/dispatch_examples.json"
+    ],
+    "unit_tests": [
+      "tests/unit/test_capture_router.py",
+      "tests/unit/test_capture_dispatch.py",
+      "tests/unit/test_personal_assistant_agent.py"
+    ]
+  }
+}
+
