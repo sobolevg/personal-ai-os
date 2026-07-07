@@ -28,5 +28,24 @@
       "should_execute_action": false,
       "confirmation_text": "Captured as a draft candidate."
     }
+  },
+  {
+    "name": "executed",
+    "expected": {
+      "execution_status": "executed",
+      "should_execute_action": false,
+      "confirmation_text": "Task created.",
+      "notion_page_id": "page-id-456",
+      "stored_events": 2
+    }
+  },
+  {
+    "name": "failed",
+    "expected": {
+      "execution_status": "failed",
+      "should_execute_action": true,
+      "confirmation_text": "Task creation failed.",
+      "stored_events": 2
+    }
   }
 ]

@@ -18,7 +18,9 @@
   "workflow": [
     "Receive Telegram text and source message id.",
     "Ask Personal Assistant for route and action.",
-    "Create high-confidence tasks through notion_task_create.",
+    "Record a planned event before any write.",
+    "Create high-confidence tasks through notion_task_create when execution is enabled.",
+    "Record executed or failed outcome events after task creation attempts.",
     "Keep resource, expense, and inbox paths as draft candidates until contracts are complete.",
     "Return a short confirmation or clarification request."
   ],
@@ -29,9 +31,9 @@
     "draft_only_for_unfinished_contracts"
   ],
   "future_improvements": [
-    "Add event log idempotency.",
     "Add confirmation UI for ambiguous captures.",
-    "Add voice and image capture handoff."
+    "Add voice and image capture handoff.",
+    "Promote the runtime path into the Hermes Telegram gateway after VPS smoke tests."
   ],
   "execution": {
     "mode": "event_driven",

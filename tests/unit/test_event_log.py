@@ -56,6 +56,28 @@ class EventLogTest(unittest.TestCase):
             self.assertEqual(duplicate_result.status, "skipped_duplicate")
             self.assertEqual(len(store.iter_events()), 1)
 
+    def test_jsonl_store_records_outcome_for_existing_event(self) -> None:
+        plan = build_capture_dispatch_plan(
+            message="todo: renew passport",
+            source_platform="telegram",
+            source_message_id="tg-event-2",
+        )
+        event = plan_event_from_dispatch(plan)
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            store = JsonlEventStore(Path(tmp_dir) / "events.jsonl")
+
+            planned = store.record_event(event)
+            executed = store.record_outcome(
+                planned,
+                status="executed",
+                notion_page_id="page-id-789",
+            )
+
+            self.assertEqual(executed.status, "executed")
+            self.assertEqual(executed.notion_page_id, "page-id-789")
+            self.assertEqual(len(store.iter_events()), 2)
+
     def test_idempotency_requires_source_and_action(self) -> None:
         with self.assertRaises(EventLogError):
             build_idempotency_key("telegram", "", "notion_task_create")
@@ -64,4 +86,3 @@ class EventLogTest(unittest.TestCase):
 def _load_json(path: Path) -> dict[str, object]:
     with path.open(encoding="utf-8") as json_file:
         return json.load(json_file)
-

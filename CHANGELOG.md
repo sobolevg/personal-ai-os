@@ -25,6 +25,7 @@
 - Added a local event log schema, JSONL store, and idempotency helpers.
 - Added runtime-safe Telegram capture planning around dispatch and event
   logging.
+- Added task execution outcome recording for high-confidence Telegram captures.
 
 ### Changed
 

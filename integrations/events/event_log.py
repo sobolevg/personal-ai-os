@@ -105,13 +105,43 @@ class JsonlEventStore:
             )
 
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._append_event(event)
+
+        return event
+
+    def record_outcome(
+        self,
+        event: PersonalAIEvent,
+        status: str,
+        notion_page_id: str | None = None,
+        error: str | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> PersonalAIEvent:
+        outcome = PersonalAIEvent(
+            event_id=str(uuid4()),
+            idempotency_key=event.idempotency_key,
+            status=status,
+            action=event.action,
+            source_platform=event.source_platform,
+            source_message_id=event.source_message_id,
+            route=event.route,
+            target=event.target,
+            write_policy=event.write_policy,
+            notion_page_id=notion_page_id,
+            error=error,
+            metadata=metadata or {},
+        )
+        _validate_event(outcome)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._append_event(outcome)
+        return outcome
+
+    def _append_event(self, event: PersonalAIEvent) -> None:
         with self.path.open("a", encoding="utf-8") as event_file:
             event_file.write(
                 json.dumps(event.to_dict(), ensure_ascii=False, sort_keys=True)
             )
             event_file.write("\n")
-
-        return event
 
     def has_idempotency_key(self, idempotency_key: str) -> bool:
         return any(
@@ -145,4 +175,3 @@ def _required_part(value: str | None, name: str) -> str:
     if not normalized:
         raise EventLogError(f"{name} is required")
     return normalized
-

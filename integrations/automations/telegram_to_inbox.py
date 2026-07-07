@@ -3,20 +3,29 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from integrations.events.event_log import (
     JsonlEventStore,
     PersonalAIEvent,
     plan_event_from_dispatch,
 )
+from integrations.notion.task_capture import DEFAULT_BUCKET
 from integrations.routing.capture_dispatch import (
     ACTION_NOTION_TASK_CREATE,
     WRITE_CREATE_ONLY,
     CaptureDispatchPlan,
     build_capture_dispatch_plan,
 )
+
+try:  # pragma: no cover - local tests inject a fake task creator.
+    from hermes.tools.notion_task_create import notion_task_create
+except Exception:  # pragma: no cover
+    notion_task_create = None
+
+TaskCreator = Callable[..., str]
 
 
 @dataclass(frozen=True)
@@ -25,6 +34,8 @@ class TelegramCaptureResult:
     event: PersonalAIEvent
     should_execute_action: bool
     confirmation_text: str
+    execution_event: PersonalAIEvent | None = None
+    action_result: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -32,6 +43,10 @@ class TelegramCaptureResult:
             "event": self.event.to_dict(),
             "should_execute_action": self.should_execute_action,
             "confirmation_text": self.confirmation_text,
+            "execution_event": (
+                self.execution_event.to_dict() if self.execution_event else None
+            ),
+            "action_result": self.action_result,
         }
 
 
@@ -62,6 +77,85 @@ def plan_telegram_capture(
     )
 
 
+def execute_telegram_capture(
+    message: str,
+    source_message_id: str,
+    event_store_path: str | Path,
+    source_platform: str = "telegram",
+    task_creator: TaskCreator | None = None,
+) -> TelegramCaptureResult:
+    result = plan_telegram_capture(
+        message=message,
+        source_message_id=source_message_id,
+        event_store_path=event_store_path,
+        source_platform=source_platform,
+    )
+    if not result.should_execute_action:
+        return result
+
+    creator = task_creator or notion_task_create
+    store = JsonlEventStore(event_store_path)
+    if creator is None:
+        execution_event = store.record_outcome(
+            result.event,
+            status="failed",
+            error="notion_task_create is not available",
+        )
+        return _replace_result(
+            result,
+            execution_event=execution_event,
+            confirmation_text="Task creation failed.",
+        )
+
+    try:
+        action_result = _parse_task_creator_result(
+            creator(
+                title=_task_title_from_dispatch(result.dispatch_plan),
+                bucket=DEFAULT_BUCKET,
+                comment=None,
+            )
+        )
+    except Exception as error:
+        execution_event = store.record_outcome(
+            result.event,
+            status="failed",
+            error=str(error),
+        )
+        return _replace_result(
+            result,
+            execution_event=execution_event,
+            confirmation_text="Task creation failed.",
+        )
+
+    if action_result.get("success") is not True:
+        execution_event = store.record_outcome(
+            result.event,
+            status="failed",
+            error=str(action_result.get("error") or "task creator returned no success"),
+            metadata={"action_result": action_result},
+        )
+        return _replace_result(
+            result,
+            action_result=action_result,
+            execution_event=execution_event,
+            confirmation_text="Task creation failed.",
+        )
+
+    execution_event = store.record_outcome(
+        result.event,
+        status="executed",
+        notion_page_id=_string_or_none(action_result.get("id")),
+        metadata={"action_result": action_result},
+    )
+    return _replace_result(
+        result,
+        action_result=action_result,
+        execution_event=execution_event,
+        should_execute_action=False,
+        confirmation_text="Task created.",
+    )
+
+
 def _should_execute_action(
     dispatch_plan: CaptureDispatchPlan,
     event: PersonalAIEvent,
@@ -87,3 +181,45 @@ def _confirmation_text(
     if dispatch_plan.needs_confirmation:
         return "I need confirmation before capturing this."
     return "Captured as a draft candidate."
+
+
+def _replace_result(
+    result: TelegramCaptureResult,
+    should_execute_action: bool | None = None,
+    confirmation_text: str | None = None,
+    execution_event: PersonalAIEvent | None = None,
+    action_result: dict[str, Any] | None = None,
+) -> TelegramCaptureResult:
+    return TelegramCaptureResult(
+        dispatch_plan=result.dispatch_plan,
+        event=result.event,
+        should_execute_action=(
+            result.should_execute_action
+            if should_execute_action is None
+            else should_execute_action
+        ),
+        confirmation_text=confirmation_text or result.confirmation_text,
+        execution_event=execution_event,
+        action_result=action_result,
+    )
+
+
+def _parse_task_creator_result(raw_result: str) -> dict[str, Any]:
+    result = json.loads(raw_result)
+    if not isinstance(result, dict):
+        raise ValueError("task creator returned non-object JSON")
+    return result
+
+
+def _task_title_from_dispatch(dispatch_plan: CaptureDispatchPlan) -> str:
+    title = dispatch_plan.normalized_text
+    for prefix in ("todo:", "task:", "задача:"):
+        if title.lower().startswith(prefix):
+            return title[len(prefix) :].strip()
+    return title
+
+
+def _string_or_none(value: object) -> str | None:
+    if value is None:
+        return None
+    return str(value)

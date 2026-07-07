@@ -5,7 +5,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from integrations.automations.telegram_to_inbox import plan_telegram_capture
+from integrations.automations.telegram_to_inbox import (
+    execute_telegram_capture,
+    plan_telegram_capture,
+)
 from integrations.events.event_log import JsonlEventStore
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -76,6 +79,106 @@ class TelegramToInboxRuntimeTest(unittest.TestCase):
             self.assertEqual(result.event.status, expected["event_status"])
             self.assertEqual(result.should_execute_action, expected["should_execute_action"])
             self.assertEqual(result.confirmation_text, expected["confirmation_text"])
+
+    def test_execute_high_confidence_task_records_executed_event(self) -> None:
+        expected = _load_expected("executed")
+        calls = []
+
+        def fake_task_creator(title, bucket, comment):
+            calls.append({"title": title, "bucket": bucket, "comment": comment})
+            return json.dumps(
+                {
+                    "success": True,
+                    "id": expected["notion_page_id"],
+                    "url": "https://notion.so/page-id-456",
+                    "title": title,
+                    "bucket": bucket,
+                    "comment": comment,
+                }
+            )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            event_store_path = Path(tmp_dir) / "events.jsonl"
+            result = execute_telegram_capture(
+                message="todo: renew passport",
+                source_message_id="tg-runtime-3",
+                event_store_path=event_store_path,
+                task_creator=fake_task_creator,
+            )
+            events = JsonlEventStore(event_store_path).iter_events()
+
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(calls[0]["title"], "renew passport")
+            self.assertIsNotNone(result.execution_event)
+            self.assertEqual(result.execution_event.status, expected["execution_status"])
+            self.assertEqual(result.execution_event.notion_page_id, expected["notion_page_id"])
+            self.assertEqual(result.should_execute_action, expected["should_execute_action"])
+            self.assertEqual(result.confirmation_text, expected["confirmation_text"])
+            self.assertEqual(len(events), expected["stored_events"])
+
+    def test_execute_duplicate_does_not_call_task_creator(self) -> None:
+        calls = []
+
+        def fake_task_creator(title, bucket, comment):
+            calls.append(title)
+            return json.dumps({"success": True, "id": "page-id-456"})
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            event_store_path = Path(tmp_dir) / "events.jsonl"
+            execute_telegram_capture(
+                message="todo: renew passport",
+                source_message_id="tg-runtime-4",
+                event_store_path=event_store_path,
+                task_creator=fake_task_creator,
+            )
+            duplicate = execute_telegram_capture(
+                message="todo: renew passport",
+                source_message_id="tg-runtime-4",
+                event_store_path=event_store_path,
+                task_creator=fake_task_creator,
+            )
+
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(duplicate.event.status, "skipped_duplicate")
+            self.assertFalse(duplicate.should_execute_action)
+
+    def test_execute_resource_draft_does_not_call_task_creator(self) -> None:
+        def fail_task_creator(title, bucket, comment):
+            raise AssertionError("task creator should not be called")
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            result = execute_telegram_capture(
+                message="https://example.com/article",
+                source_message_id="tg-runtime-5",
+                event_store_path=Path(tmp_dir) / "events.jsonl",
+                task_creator=fail_task_creator,
+            )
+
+            self.assertEqual(result.dispatch_plan.route, "resource")
+            self.assertIsNone(result.execution_event)
+            self.assertFalse(result.should_execute_action)
+
+    def test_execute_task_records_failed_event_on_creator_error(self) -> None:
+        expected = _load_expected("failed")
+
+        def fail_task_creator(title, bucket, comment):
+            raise RuntimeError("Notion unavailable")
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            event_store_path = Path(tmp_dir) / "events.jsonl"
+            result = execute_telegram_capture(
+                message="todo: renew passport",
+                source_message_id="tg-runtime-6",
+                event_store_path=event_store_path,
+                task_creator=fail_task_creator,
+            )
+            events = JsonlEventStore(event_store_path).iter_events()
+
+            self.assertIsNotNone(result.execution_event)
+            self.assertEqual(result.execution_event.status, expected["execution_status"])
+            self.assertEqual(result.confirmation_text, expected["confirmation_text"])
+            self.assertEqual(result.should_execute_action, expected["should_execute_action"])
+            self.assertEqual(len(events), expected["stored_events"])
 
 
 def _load_expected(name: str) -> dict[str, object]:
