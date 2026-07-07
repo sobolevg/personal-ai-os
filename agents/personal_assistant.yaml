@@ -1,2 +1,23 @@
 name: personal_assistant
-status: todo
+status: draft
+role: first_pass_capture_router
+prompt: prompts/agents/personal_assistant_router.md
+owned_routes:
+  - task
+  - resource
+  - expense
+  - inbox
+routing_contract:
+  default_route: inbox
+  deterministic_reference: integrations/routing/capture_router.py
+  fixed_examples: tests/fixtures/capture_router/examples.json
+rules:
+  - never_route_to_internal_hermes_todo
+  - prefer_inbox_when_unclear
+  - do_not_redesign_notion_workspace
+  - do_not_bulk_edit_notion_without_confirmation
+targets:
+  task: notion.tasks
+  resource: notion.resources
+  expense: notion.expenses
+  inbox: notion.inbox_candidate

@@ -1,0 +1,83 @@
+[
+  {
+    "name": "explicit_task_ru",
+    "message": "Нужно продлить страховку машины",
+    "expected": {
+      "route": "task",
+      "confidence": "high",
+      "target": "notion.tasks"
+    }
+  },
+  {
+    "name": "explicit_task_en",
+    "message": "todo: renew passport",
+    "expected": {
+      "route": "task",
+      "confidence": "high",
+      "target": "notion.tasks"
+    }
+  },
+  {
+    "name": "resource_url",
+    "message": "https://example.com/article about home server backups",
+    "expected": {
+      "route": "resource",
+      "confidence": "medium",
+      "target": "notion.resources"
+    }
+  },
+  {
+    "name": "resource_marker_ru",
+    "message": "прочитать статью про local-first agents",
+    "expected": {
+      "route": "resource",
+      "confidence": "low",
+      "target": "notion.resources"
+    }
+  },
+  {
+    "name": "expense_with_amount",
+    "message": "купил кофе 4.50 EUR",
+    "expected": {
+      "route": "expense",
+      "confidence": "high",
+      "target": "notion.expenses"
+    }
+  },
+  {
+    "name": "expense_with_dollar_amount",
+    "message": "paid hosting 12$",
+    "expected": {
+      "route": "expense",
+      "confidence": "high",
+      "target": "notion.expenses"
+    }
+  },
+  {
+    "name": "ambiguous_money",
+    "message": "45 EUR",
+    "expected": {
+      "route": "inbox",
+      "confidence": "low",
+      "target": null
+    }
+  },
+  {
+    "name": "unknown_note",
+    "message": "идея для будущей системы с недельными обзорами",
+    "expected": {
+      "route": "inbox",
+      "confidence": "low",
+      "target": null
+    }
+  },
+  {
+    "name": "empty_message",
+    "message": "   ",
+    "expected": {
+      "route": "inbox",
+      "confidence": "low",
+      "target": null
+    }
+  }
+]

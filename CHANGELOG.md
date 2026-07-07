@@ -12,6 +12,8 @@
 - Added deployment log for the first VPS Hermes bridge rollout.
 - Added repo-owned Hermes `notion-tasks` skill routing overlay.
 - Added install script for Hermes skill overlays.
+- Added first-pass capture router with fixed examples for task, resource,
+  expense, and inbox routing.
 
 ### Changed
 
