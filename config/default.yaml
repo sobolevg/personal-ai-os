@@ -10,3 +10,4 @@ hermes:
 events:
   store: jsonl
   path: state/events.jsonl
+  max_bytes: 10485760

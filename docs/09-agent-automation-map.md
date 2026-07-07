@@ -31,6 +31,7 @@ Implemented as local foundations, not deployed:
 - runtime-safe Telegram capture planning around dispatch and event logging
 - task execution path for high-confidence Telegram captures, with executed or
   failed outcome events
+- event log path management script for install, backup, and rotation
 
 Not implemented yet:
 

@@ -37,3 +37,34 @@ Before changing Hermes config, back up:
 - Store source message and idempotency key.
 - Store previous values before updates where practical.
 - Archive instead of permanent delete.
+
+## Event Log
+
+Default VPS path:
+
+```text
+/root/.hermes/personal-ai-os/events/events.jsonl
+```
+
+Override with:
+
+```text
+PERSONAL_AI_OS_EVENT_LOG_PATH
+```
+
+The event log is append-only JSONL. It stores planned, executed, failed, and
+duplicate-skipped events. It does not store secrets.
+
+Manage the path with:
+
+```bash
+deploy/scripts/manage-event-log.sh plan
+deploy/scripts/manage-event-log.sh verify
+deploy/scripts/manage-event-log.sh install --apply
+deploy/scripts/manage-event-log.sh backup --apply
+deploy/scripts/manage-event-log.sh rotate --apply
+```
+
+Rotation backs up the current JSONL file under `/root/.hermes/backups` before
+truncating it. The default rotation threshold is `10485760` bytes and can be
+changed with `MAX_BYTES`.

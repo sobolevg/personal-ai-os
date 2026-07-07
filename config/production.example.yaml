@@ -8,5 +8,6 @@ hermes:
   extension_path: /opt/personal-ai-os/hermes
 
 events:
-  store: sqlite
-  path: /var/lib/personal-ai-os/events.sqlite
+  store: jsonl
+  path: /root/.hermes/personal-ai-os/events/events.jsonl
+  max_bytes: 10485760

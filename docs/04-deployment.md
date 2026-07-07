@@ -53,6 +53,25 @@ deploy/scripts/install-hermes-extension.sh install --apply
 
 The script does not restart Hermes and does not perform Notion writes.
 
+## Event Log Install
+
+The Telegram capture runtime uses an append-only JSONL event log. On the VPS,
+prepare the path before enabling runtime automation:
+
+```bash
+deploy/scripts/manage-event-log.sh plan
+deploy/scripts/manage-event-log.sh verify
+deploy/scripts/manage-event-log.sh install --apply
+```
+
+Default path:
+
+```text
+/root/.hermes/personal-ai-os/events/events.jsonl
+```
+
+The script does not restart Hermes and does not write to Notion.
+
 ## Deployment Log
 
 Deployment history is tracked in `docs/08-deployment-log.md`.

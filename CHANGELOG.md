@@ -26,6 +26,8 @@
 - Added runtime-safe Telegram capture planning around dispatch and event
   logging.
 - Added task execution outcome recording for high-confidence Telegram captures.
+- Added event log path configuration and management script for VPS install,
+  backup, and rotation.
 
 ### Changed
 

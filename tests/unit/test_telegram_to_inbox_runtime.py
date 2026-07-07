@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from integrations.automations.telegram_to_inbox import (
     execute_telegram_capture,
     plan_telegram_capture,
+    resolve_event_store_path,
 )
 from integrations.events.event_log import JsonlEventStore
 
@@ -179,6 +182,25 @@ class TelegramToInboxRuntimeTest(unittest.TestCase):
             self.assertEqual(result.confirmation_text, expected["confirmation_text"])
             self.assertEqual(result.should_execute_action, expected["should_execute_action"])
             self.assertEqual(len(events), expected["stored_events"])
+
+    def test_default_event_store_path_uses_env_override(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            env_path = str(Path(tmp_dir) / "custom-events.jsonl")
+
+            with patch.dict(os.environ, {"PERSONAL_AI_OS_EVENT_LOG_PATH": env_path}):
+                self.assertEqual(resolve_event_store_path(), Path(env_path))
+
+    def test_default_event_store_path_uses_hermes_home(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with patch.dict(
+                os.environ,
+                {"HERMES_HOME": tmp_dir},
+                clear=True,
+            ):
+                self.assertEqual(
+                    resolve_event_store_path(),
+                    Path(tmp_dir) / "personal-ai-os" / "events" / "events.jsonl",
+                )
 
 
 def _load_expected(name: str) -> dict[str, object]:

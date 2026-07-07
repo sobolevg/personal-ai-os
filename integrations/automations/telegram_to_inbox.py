@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+import os
 from pathlib import Path
 from typing import Any, Callable
 
@@ -26,6 +27,7 @@ except Exception:  # pragma: no cover
     notion_task_create = None
 
 TaskCreator = Callable[..., str]
+DEFAULT_EVENT_LOG_RELATIVE_PATH = "personal-ai-os/events/events.jsonl"
 
 
 @dataclass(frozen=True)
@@ -53,7 +55,7 @@ class TelegramCaptureResult:
 def plan_telegram_capture(
     message: str,
     source_message_id: str,
-    event_store_path: str | Path,
+    event_store_path: str | Path | None = None,
     source_platform: str = "telegram",
 ) -> TelegramCaptureResult:
     dispatch_plan = build_capture_dispatch_plan(
@@ -62,7 +64,8 @@ def plan_telegram_capture(
         source_message_id=source_message_id,
     )
     planned_event = plan_event_from_dispatch(dispatch_plan)
-    recorded_event = JsonlEventStore(event_store_path).record_event(planned_event)
+    event_store = JsonlEventStore(resolve_event_store_path(event_store_path))
+    recorded_event = event_store.record_event(planned_event)
     should_execute_action = _should_execute_action(dispatch_plan, recorded_event)
 
     return TelegramCaptureResult(
@@ -80,21 +83,22 @@ def plan_telegram_capture(
 def execute_telegram_capture(
     message: str,
     source_message_id: str,
-    event_store_path: str | Path,
+    event_store_path: str | Path | None = None,
     source_platform: str = "telegram",
     task_creator: TaskCreator | None = None,
 ) -> TelegramCaptureResult:
+    resolved_event_store_path = resolve_event_store_path(event_store_path)
     result = plan_telegram_capture(
         message=message,
         source_message_id=source_message_id,
-        event_store_path=event_store_path,
+        event_store_path=resolved_event_store_path,
         source_platform=source_platform,
     )
     if not result.should_execute_action:
         return result
 
     creator = task_creator or notion_task_create
-    store = JsonlEventStore(event_store_path)
+    store = JsonlEventStore(resolved_event_store_path)
     if creator is None:
         execution_event = store.record_outcome(
             result.event,
@@ -181,6 +185,18 @@ def _confirmation_text(
     if dispatch_plan.needs_confirmation:
         return "I need confirmation before capturing this."
     return "Captured as a draft candidate."
+
+
+def resolve_event_store_path(event_store_path: str | Path | None = None) -> Path:
+    if event_store_path is not None:
+        return Path(event_store_path)
+
+    env_path = os.environ.get("PERSONAL_AI_OS_EVENT_LOG_PATH")
+    if env_path:
+        return Path(env_path)
+
+    hermes_home = Path(os.environ.get("HERMES_HOME", "/root/.hermes"))
+    return hermes_home / DEFAULT_EVENT_LOG_RELATIVE_PATH
 
 
 def _replace_result(
