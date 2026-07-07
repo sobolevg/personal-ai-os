@@ -32,6 +32,8 @@
   behind the separate `personal_ai_os_capture` toolset.
 - Added a Telegram capture enable/disable script for
   `platform_toolsets.telegram`.
+- Added read-only event log review tooling for summaries and pending planned
+  captures.
 
 ### Changed
 

@@ -69,6 +69,19 @@ Rotation backs up the current JSONL file under `/root/.hermes/backups` before
 truncating it. The default rotation threshold is `10485760` bytes and can be
 changed with `MAX_BYTES`.
 
+Review the current queue with:
+
+```bash
+deploy/scripts/review-event-log.sh summary
+deploy/scripts/review-event-log.sh pending
+deploy/scripts/review-event-log.sh pending --limit 20
+```
+
+These commands are read-only. A pending item is a source/action pair whose
+latest event is still `planned`. If a later `executed` or `failed` outcome is
+recorded for the same idempotency key, the item no longer appears in pending
+review.
+
 ## Telegram Capture Runtime
 
 Install or verify the prepared Hermes bridge with:

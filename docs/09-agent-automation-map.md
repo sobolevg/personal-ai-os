@@ -32,6 +32,7 @@ Implemented as local foundations:
 - task execution path for high-confidence Telegram captures, with executed or
   failed outcome events
 - event log path management script for install, backup, and rotation
+- read-only event log review for summary and pending planned captures
 
 Implemented on the VPS:
 
@@ -51,6 +52,7 @@ Not implemented yet:
 - Notion write enablement through `PERSONAL_AI_OS_CAPTURE_EXECUTE_ENABLED`
 - Notion write contracts beyond tasks
 - confirmation UI for ambiguous captures
+- execution flow from reviewed planned captures
 
 ## Agent Catalog
 
@@ -69,7 +71,7 @@ Not implemented yet:
 
 | Automation | Status | Agents | Write policy | Runtime readiness |
 | --- | --- | --- | --- | --- |
-| Telegram To Inbox | draft | Personal Assistant, Inbox Processor, Task Planner, Resource Importer | `create_only` for high-confidence tasks; draft for unfinished paths | Ordinary Telegram dry-plan routing passed; writes still disabled |
+| Telegram To Inbox | draft | Personal Assistant, Inbox Processor, Task Planner, Resource Importer | `create_only` for high-confidence tasks; draft for unfinished paths | Ordinary Telegram dry-plan routing passed; pending review tooling added; writes still disabled |
 | Voice Notes | draft | Personal Assistant, Inbox Processor | `draft_only` | Needs transcription path |
 | Daily Planning | draft | Task Planner, Weekly Review, Personal Assistant | `read_only` | Needs Notion read contracts |
 | Weekly Review | draft | Weekly Review, Task Planner, Project Manager | `draft_only` | Needs Notion read contracts |
@@ -114,13 +116,11 @@ Before enabling broader runtime automation:
 
 ## Next Build Steps
 
-1. Wrap `Telegram To Inbox` around the existing dispatch plan.
-2. Record planned events before writes.
-3. Block duplicate events by idempotency key.
-4. Add confirmation/draft handling for resource, expense, and inbox paths.
-5. Decide when to enable Notion task writes through the server-side execution
+1. Add confirmation/draft handling for resource, expense, and inbox paths.
+2. Add execution flow from reviewed planned captures.
+3. Decide when to enable Notion task writes through the server-side execution
    flags.
-6. Tag a runtime checkpoint after automatic routing verification.
+4. Tag a runtime checkpoint after reviewed execution verification.
 
 ## Checkpoint Criteria
 
