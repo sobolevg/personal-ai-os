@@ -1,2 +1,31 @@
 name: telegram_to_inbox
-status: todo
+status: draft
+entrypoint: integrations.routing.capture_dispatch.build_capture_dispatch_plan
+source:
+  platform: telegram
+  message_id_required: true
+routes:
+  task:
+    action: notion_task_create
+    write_policy: create_only
+    target: notion.tasks
+  resource:
+    action: resource_candidate
+    write_policy: draft_only
+    target: notion.resources
+  expense:
+    action: expense_candidate
+    write_policy: draft_only
+    target: notion.expenses
+  inbox:
+    action: inbox_candidate
+    write_policy: draft_only
+    target: null
+safety:
+  - no_internal_hermes_todo
+  - no_bulk_notion_edits
+  - no_resource_or_expense_writes_until_contracts_are_filled
+  - ambiguous_low_confidence_messages_need_confirmation
+verification:
+  fixtures: tests/fixtures/capture_router/dispatch_examples.json
+  unit_test: tests/unit/test_capture_dispatch.py

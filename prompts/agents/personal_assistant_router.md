@@ -27,7 +27,7 @@ Output JSON:
   "route": "task|resource|expense|inbox",
   "confidence": "high|medium|low",
   "reason": "short reason",
-  "target": "notion.tasks|notion.resources|notion.expenses|null"
+  "target": "notion.tasks|notion.resources|notion.expenses|null",
+  "action": "notion_task_create|resource_candidate|expense_candidate|inbox_candidate"
 }
 ```
-

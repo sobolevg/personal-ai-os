@@ -14,6 +14,8 @@
 - Added install script for Hermes skill overlays.
 - Added first-pass capture router with fixed examples for task, resource,
   expense, and inbox routing.
+- Added safe dispatch plans for Telegram capture routing without new Notion
+  writes for unfinished resource and expense contracts.
 
 ### Changed
 

@@ -1,0 +1,55 @@
+[
+  {
+    "name": "high_confidence_task_can_use_native_tool",
+    "message": "Нужно продлить страховку машины",
+    "source_platform": "telegram",
+    "source_message_id": "tg-1001",
+    "expected": {
+      "route": "task",
+      "action": "notion_task_create",
+      "write_policy": "create_only",
+      "needs_confirmation": false,
+      "target": "notion.tasks"
+    }
+  },
+  {
+    "name": "resource_stays_draft_until_contract_exists",
+    "message": "https://example.com/article about home server backups",
+    "source_platform": "telegram",
+    "source_message_id": "tg-1002",
+    "expected": {
+      "route": "resource",
+      "action": "resource_candidate",
+      "write_policy": "draft_only",
+      "needs_confirmation": false,
+      "target": "notion.resources"
+    }
+  },
+  {
+    "name": "expense_stays_draft_until_contract_exists",
+    "message": "купил кофе 4.50 EUR",
+    "source_platform": "telegram",
+    "source_message_id": "tg-1003",
+    "expected": {
+      "route": "expense",
+      "action": "expense_candidate",
+      "write_policy": "draft_only",
+      "needs_confirmation": false,
+      "target": "notion.expenses"
+    }
+  },
+  {
+    "name": "ambiguous_note_needs_confirmation",
+    "message": "идея для будущей системы с недельными обзорами",
+    "source_platform": "telegram",
+    "source_message_id": "tg-1004",
+    "expected": {
+      "route": "inbox",
+      "action": "inbox_candidate",
+      "write_policy": "draft_only",
+      "needs_confirmation": true,
+      "target": null
+    }
+  }
+]
+
