@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Personal AI OS Event",
+  "type": "object",
+  "required": [
+    "event_id",
+    "idempotency_key",
+    "status",
+    "action",
+    "source_platform",
+    "source_message_id",
+    "created_at"
+  ],
+  "properties": {
+    "event_id": {"type": "string"},
+    "idempotency_key": {"type": "string"},
+    "status": {
+      "type": "string",
+      "enum": ["planned", "executed", "failed", "skipped_duplicate"]
+    },
+    "action": {"type": "string"},
+    "source_platform": {"type": "string"},
+    "source_message_id": {"type": "string"},
+    "route": {"type": ["string", "null"]},
+    "target": {"type": ["string", "null"]},
+    "write_policy": {"type": ["string", "null"]},
+    "created_at": {"type": "string"},
+    "notion_page_id": {"type": ["string", "null"]},
+    "error": {"type": ["string", "null"]},
+    "metadata": {"type": "object"}
+  }
+}
+

@@ -23,9 +23,14 @@ Implemented in git:
 - deterministic capture router and dispatch plan tests
 - Hermes native `notion_task_create` bridge for task creation
 
+Implemented as local foundations, not deployed:
+
+- event log schema and JSONL store
+- idempotency key generation from source platform, source message id, and
+  action
+
 Not implemented yet:
 
-- event log and idempotency
 - production Telegram automation wrapper
 - Notion write contracts beyond tasks
 - confirmation UI for ambiguous captures
@@ -85,7 +90,7 @@ Why this path first:
 
 Before enabling broader runtime automation:
 
-- add event log and idempotency
+- wire event log into the Telegram runtime path
 - do not create resource, expense, project, or knowledge pages directly
 - keep ambiguous captures as draft candidates
 - keep bulk updates confirmation-only
@@ -93,10 +98,9 @@ Before enabling broader runtime automation:
 
 ## Next Build Steps
 
-1. Add event log schema and local store.
-2. Add idempotency key generation from `source_platform`, `source_message_id`,
-   and action.
-3. Wrap `Telegram To Inbox` around the existing dispatch plan.
+1. Wrap `Telegram To Inbox` around the existing dispatch plan.
+2. Record planned events before writes.
+3. Block duplicate events by idempotency key.
 4. Keep only high-confidence task creation as direct Notion write.
 5. Add confirmation/draft handling for resource, expense, and inbox paths.
 6. Tag a design checkpoint before any VPS deploy.
@@ -110,4 +114,3 @@ This design layer is ready to merge when:
 - this map matches the contract catalog
 - no VPS deploy is required for the merge
 - rollout notes clearly say this is a design checkpoint, not runtime activation
-

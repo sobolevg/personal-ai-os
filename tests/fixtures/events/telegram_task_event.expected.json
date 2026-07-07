@@ -1,0 +1,10 @@
+{
+  "action": "notion_task_create",
+  "source_platform": "telegram",
+  "source_message_id": "tg-event-1",
+  "status": "planned",
+  "route": "task",
+  "target": "notion.tasks",
+  "write_policy": "create_only"
+}
+
