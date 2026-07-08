@@ -1,5 +1,69 @@
 # Deployment Log
 
+## 2026-07-08 - Research Agent Draft Runtime
+
+Status: deployed the second partial-runtime agent. Telegram research and
+purchase-research captures now route to planned `research_brief` events with
+Research Agent draft metadata. Live web research and Notion writes remain
+disabled.
+
+Commit deployed:
+
+```text
+e48153c feat: add research agent draft runtime
+```
+
+Target:
+
+```text
+VPS host: hermes
+Checkout: /opt/personal-ai-os
+Hermes service: hermes-gateway.service
+Branch: phase3-capture-router-v1
+```
+
+Deployment:
+
+- transferred the branch update as a git bundle.
+- merged with `git merge --ff-only origin/phase3-capture-router-v1`.
+- reinstalled the `personal-ai-os-capture` Hermes skill overlay.
+- restarted `hermes-gateway.service`.
+
+Validation:
+
+- ran `python3 -m unittest discover` on the VPS: 55 tests OK
+- confirmed `hermes-gateway.service` is active
+- local VPS smoke returned `route=research`, `action=research_brief`,
+  `agent=research_agent`, and `research_type=purchase`
+- sent Telegram smoke:
+  `купить белые кроссовки Nike размер 43 с доставкой домой research agent smoke 20260708`
+- event log recorded:
+  - status: `planned`
+  - route: `research`
+  - action: `research_brief`
+  - target: `notion.research`
+  - write policy: `draft_only`
+  - agent: `research_agent`
+  - research type: `purchase`
+  - missing input: `budget`
+  - Notion page id: `null`
+
+Backup:
+
+```text
+/root/.hermes/backups/personal-ai-os-skill-personal-ai-os-capture-20260708T083224Z
+```
+
+Rollback:
+
+```bash
+cd /opt/personal-ai-os
+git checkout v0.3.5-knowledge-curator-draft
+rm -rf "/root/.hermes/skills/productivity/personal-ai-os-capture"
+cp -R "/root/.hermes/backups/personal-ai-os-skill-personal-ai-os-capture-20260708T083224Z/personal-ai-os-capture" "/root/.hermes/skills/productivity/personal-ai-os-capture"
+systemctl restart hermes-gateway
+```
+
 ## 2026-07-08 - Knowledge Curator Draft Runtime
 
 Status: deployed the first partial-runtime agent. Telegram knowledge captures
