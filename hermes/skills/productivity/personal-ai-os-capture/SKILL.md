@@ -10,6 +10,8 @@ This includes:
 - ideas
 - "think about this" prompts
 - knowledge candidates
+- research requests
+- purchase research such as "find/buy/choose X with delivery"
 - links or resources to classify later
 - ambiguous inbox captures
 
@@ -19,6 +21,9 @@ Examples:
 - `заметка: local-first agents need rollback points`
 - `подумать над personal ai os как системой агентов вокруг Hermes`
 - `think about how weekly review should work`
+- `найди белые кроссовки Nike размер 43 с доставкой домой`
+- `купить белые кроссовки Nike размер 43`
+- `choose the best monitor for a home office`
 - `todo: купить лампочки`
 - `https://example.com/article about home server backups`
 
@@ -41,6 +46,8 @@ The tool handles routing internally:
 - task captures become `notion_task_create` planned events
 - note, idea, and "think about" captures become `knowledge_candidate` planned
   events with Knowledge Curator draft metadata
+- find, compare, choose, buy, and delivery captures become `research_brief`
+  planned events with Research Agent draft metadata
 - links become resource candidates
 - unclear messages become inbox candidates
 
@@ -54,8 +61,8 @@ Hermes internal `todo` for ordinary Telegram capture messages.
 
 - Do not redesign the Notion workspace.
 - Do not create knowledge pages directly.
-- Do not run external research unless the user explicitly asks for research or
-  the capture is already being processed by a research workflow.
+- Do not run external research inside the capture step. The capture step should
+  create a `research_brief` draft and list missing inputs or next actions.
 - Keep all knowledge outputs as draft candidates until confirmation/write
   contracts exist.
 

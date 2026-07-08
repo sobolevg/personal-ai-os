@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from integrations.agents.knowledge_curator import curate_knowledge_candidate
+from integrations.agents.research_agent import draft_research_brief
 from integrations.events.event_log import (
     JsonlEventStore,
     PersonalAIEvent,
@@ -19,6 +20,7 @@ from integrations.notion.task_capture import DEFAULT_BUCKET
 from integrations.routing.capture_dispatch import (
     ACTION_NOTION_TASK_CREATE,
     ACTION_KNOWLEDGE_CANDIDATE,
+    ACTION_RESEARCH_BRIEF,
     WRITE_CREATE_ONLY,
     CaptureDispatchPlan,
     build_capture_dispatch_plan,
@@ -181,7 +183,18 @@ def _event_from_dispatch_with_agent_draft(
 ) -> PersonalAIEvent:
     event = plan_event_from_dispatch(dispatch_plan)
     if dispatch_plan.action != ACTION_KNOWLEDGE_CANDIDATE:
-        return event
+        if dispatch_plan.action != ACTION_RESEARCH_BRIEF:
+            return event
+
+        draft = draft_research_brief(dispatch_plan.normalized_text)
+        return replace(
+            event,
+            metadata={
+                **event.metadata,
+                "agent": "research_agent",
+                "research_brief": draft.to_dict(),
+            },
+        )
 
     draft = curate_knowledge_candidate(dispatch_plan.normalized_text)
     return replace(

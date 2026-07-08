@@ -36,6 +36,8 @@
   captures.
 - Added a draft-only Knowledge Curator runtime and routed durable note captures
   to `knowledge_candidate` events.
+- Added a draft-only Research Agent runtime and routed research and purchase
+  requests to `research_brief` events.
 
 ### Changed
 
@@ -65,6 +67,8 @@
   an ordinary Telegram `todo:` dry-plan smoke test.
 - Updated Personal Assistant routing to recognize knowledge notes separately
   from generic inbox captures.
+- Updated Personal Assistant routing to recognize research requests separately
+  from knowledge and inbox captures.
 
 ## v0.1.0-docs-baseline - 2026-07-06
 

@@ -81,6 +81,15 @@
     }
   },
   {
+    "name": "purchase_research_ru",
+    "message": "купить белые кроссовки Nike размер 43 с доставкой домой",
+    "expected": {
+      "route": "research",
+      "confidence": "medium",
+      "target": "notion.research"
+    }
+  },
+  {
     "name": "empty_message",
     "message": "   ",
     "expected": {

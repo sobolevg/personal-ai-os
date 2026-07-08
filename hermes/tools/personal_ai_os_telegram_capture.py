@@ -85,8 +85,8 @@ PERSONAL_AI_OS_TELEGRAM_CAPTURE_SCHEMA = {
         "Route a Telegram message through Evgenii's Personal AI OS capture path. "
         "Use this for Telegram capture messages such as 'todo:', 'task:', "
         "'задача:', 'идея:', 'заметка:', 'подумать над ...', 'добавь задачу', "
-        "'запиши задачу', 'на потом', or other short task/resource/knowledge/inbox "
-        "captures. By default this only plans and logs capture intent. Set "
+        "'запиши задачу', 'на потом', 'найди ...', 'выбери ...', 'купить ...', "
+        "or other short task/resource/knowledge/research/inbox captures. By default this only plans and logs capture intent. Set "
         "execute=true only when the Telegram message is ready for the runtime "
         "automation path."
     ),

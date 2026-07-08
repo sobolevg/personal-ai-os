@@ -1,6 +1,6 @@
 {
   "name": "research_agent",
-  "status": "draft",
+  "status": "partial_runtime",
   "purpose": "Research a question, collect sources, and produce a concise evidence-backed brief.",
   "prompt": "prompts/agents/research_agent.md",
   "inputs": [
@@ -14,7 +14,13 @@
     {"name": "open_questions", "type": "array"},
     {"name": "knowledge_handoff", "type": "object"}
   ],
-  "tools": ["web_search", "web_extract", "memory", "knowledge_curator"],
+  "tools": [
+    "integrations.agents.research_agent.draft_research_brief",
+    "web_search",
+    "web_extract",
+    "memory",
+    "knowledge_curator"
+  ],
   "triggers": ["manual research request", "Project Manager research need", "Knowledge Curator gap"],
   "workflow": [
     "Clarify the research question when scope is too broad.",
@@ -45,7 +51,9 @@
   },
   "verification": {
     "fixtures": ["tests/fixtures/agents/research_agent.examples.json"],
-    "unit_tests": ["tests/unit/test_agent_contracts.py"]
+    "unit_tests": [
+      "tests/unit/test_agent_contracts.py",
+      "tests/unit/test_research_agent_runtime.py"
+    ]
   }
 }
-

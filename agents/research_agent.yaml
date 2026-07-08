@@ -1,4 +1,4 @@
 name: research_agent
-status: draft
+status: partial_runtime
 contract: agents/research_agent.agent.json
 prompt: prompts/agents/research_agent.md

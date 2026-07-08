@@ -38,7 +38,7 @@
     {
       "name": "route",
       "type": "enum",
-      "values": ["task", "resource", "expense", "knowledge", "inbox"]
+      "values": ["task", "resource", "expense", "knowledge", "research", "inbox"]
     },
     {
       "name": "action",
@@ -48,6 +48,7 @@
         "resource_candidate",
         "expense_candidate",
         "knowledge_candidate",
+        "research_brief",
         "inbox_candidate"
       ]
     },
@@ -72,21 +73,22 @@
   ],
   "workflow": [
     "Normalize the incoming message.",
-    "Classify it into task, resource, expense, knowledge, or inbox.",
+    "Classify it into task, resource, expense, knowledge, research, or inbox.",
     "Choose the safest next action and write policy.",
     "Preserve source platform and source message id.",
     "Use notion_task_create only for high-confidence tasks.",
-    "Return candidate plans for unfinished resource, expense, knowledge, and inbox workflows."
+    "Return candidate plans for unfinished resource, expense, knowledge, research, and inbox workflows."
   ],
   "routing": {
     "implementation": "integrations.routing.capture_dispatch.build_capture_dispatch_plan",
     "default_route": "inbox",
-    "allowed_routes": ["task", "resource", "expense", "knowledge", "inbox"],
+    "allowed_routes": ["task", "resource", "expense", "knowledge", "research", "inbox"],
     "allowed_actions": [
       "notion_task_create",
       "resource_candidate",
       "expense_candidate",
       "knowledge_candidate",
+      "research_brief",
       "inbox_candidate"
     ],
     "write_policies": {
@@ -94,6 +96,7 @@
       "resource": "draft_only",
       "expense": "draft_only",
       "knowledge": "draft_only",
+      "research": "draft_only",
       "inbox": "draft_only"
     }
   },

@@ -9,9 +9,17 @@ ROUTE_TASK = "task"
 ROUTE_RESOURCE = "resource"
 ROUTE_EXPENSE = "expense"
 ROUTE_KNOWLEDGE = "knowledge"
+ROUTE_RESEARCH = "research"
 ROUTE_INBOX = "inbox"
 
-VALID_ROUTES = (ROUTE_TASK, ROUTE_RESOURCE, ROUTE_EXPENSE, ROUTE_KNOWLEDGE, ROUTE_INBOX)
+VALID_ROUTES = (
+    ROUTE_TASK,
+    ROUTE_RESOURCE,
+    ROUTE_EXPENSE,
+    ROUTE_KNOWLEDGE,
+    ROUTE_RESEARCH,
+    ROUTE_INBOX,
+)
 
 URL_RE = re.compile(r"https?://\S+|www\.\S+", re.IGNORECASE)
 MONEY_RE = re.compile(
@@ -55,6 +63,23 @@ KNOWLEDGE_MARKERS = (
     "подумать",
     "think about",
     "research idea",
+)
+
+RESEARCH_MARKERS = (
+    "research:",
+    "исследуй",
+    "найди",
+    "выбери",
+    "подбери",
+    "сравни",
+    "купить",
+    "доставка",
+    "research",
+    "find",
+    "compare",
+    "choose",
+    "buy",
+    "delivery",
 )
 
 EXPENSE_MARKERS = (
@@ -101,6 +126,7 @@ def route_capture_message(message: str | None) -> CaptureRoute:
     task_marker = _first_marker(lowered, TASK_MARKERS)
     resource_marker = _first_marker(lowered, RESOURCE_MARKERS)
     knowledge_marker = _first_marker(lowered, KNOWLEDGE_MARKERS)
+    research_marker = _first_marker(lowered, RESEARCH_MARKERS)
     expense_marker = _first_marker(lowered, EXPENSE_MARKERS)
 
     if expense_marker:
@@ -113,6 +139,8 @@ def route_capture_message(message: str | None) -> CaptureRoute:
         signals.append(f"resource_marker:{resource_marker}")
     if knowledge_marker:
         signals.append(f"knowledge_marker:{knowledge_marker}")
+    if research_marker:
+        signals.append(f"research_marker:{research_marker}")
     if has_url:
         signals.append("url")
 
@@ -141,6 +169,15 @@ def route_capture_message(message: str | None) -> CaptureRoute:
             normalized_text=normalized_text,
             signals=tuple(signals),
             target="notion.knowledge",
+        )
+
+    if research_marker:
+        return CaptureRoute(
+            route=ROUTE_RESEARCH,
+            confidence="medium",
+            normalized_text=normalized_text,
+            signals=tuple(signals),
+            target="notion.research",
         )
 
     if has_url or resource_marker:

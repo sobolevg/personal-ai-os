@@ -35,7 +35,9 @@ class HermesSkillRoutingTest(unittest.TestCase):
 
         self.assertIn("personal_ai_os_telegram_capture", skill_text)
         self.assertIn("knowledge_candidate", skill_text)
+        self.assertIn("research_brief", skill_text)
         self.assertIn("Knowledge Curator", skill_text)
+        self.assertIn("Research Agent", skill_text)
         self.assertIn("Do not use `session_search`", skill_text)
 
 

@@ -107,6 +107,26 @@ class TelegramToInboxRuntimeTest(unittest.TestCase):
                 events[0]["metadata"]["knowledge_candidate"]["links_to_existing_topics"],
             )
 
+    def test_research_capture_records_research_agent_draft(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            event_store_path = Path(tmp_dir) / "events.jsonl"
+            result = plan_telegram_capture(
+                message="купить белые кроссовки Nike размер 43 с доставкой домой",
+                source_message_id="tg-runtime-research-1",
+                event_store_path=event_store_path,
+            )
+            events = JsonlEventStore(event_store_path).iter_events()
+
+            self.assertEqual(result.dispatch_plan.route, "research")
+            self.assertEqual(result.dispatch_plan.action, "research_brief")
+            self.assertFalse(result.should_execute_action)
+            self.assertEqual(result.confirmation_text, "Captured as a draft candidate.")
+            self.assertEqual(events[0]["metadata"]["agent"], "research_agent")
+            research_brief = events[0]["metadata"]["research_brief"]
+            self.assertEqual(research_brief["target"], "notion.research")
+            self.assertEqual(research_brief["research_type"], "purchase")
+            self.assertIn("budget", research_brief["missing_inputs"])
+
     def test_execute_high_confidence_task_records_executed_event(self) -> None:
         expected = _load_expected("executed")
         calls = []

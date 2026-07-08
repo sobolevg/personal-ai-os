@@ -50,5 +50,18 @@
       "needs_confirmation": false,
       "target": "notion.knowledge"
     }
+  },
+  {
+    "name": "purchase_research_stays_draft_until_live_research",
+    "message": "купить белые кроссовки Nike размер 43 с доставкой домой",
+    "source_platform": "telegram",
+    "source_message_id": "tg-1005",
+    "expected": {
+      "route": "research",
+      "action": "research_brief",
+      "write_policy": "draft_only",
+      "needs_confirmation": false,
+      "target": "notion.research"
+    }
   }
 ]

@@ -8,6 +8,7 @@ from integrations.routing.capture_router import (
     ROUTE_EXPENSE,
     ROUTE_INBOX,
     ROUTE_KNOWLEDGE,
+    ROUTE_RESEARCH,
     ROUTE_RESOURCE,
     ROUTE_TASK,
     CaptureRoute,
@@ -18,6 +19,7 @@ ACTION_NOTION_TASK_CREATE = "notion_task_create"
 ACTION_RESOURCE_CANDIDATE = "resource_candidate"
 ACTION_EXPENSE_CANDIDATE = "expense_candidate"
 ACTION_KNOWLEDGE_CANDIDATE = "knowledge_candidate"
+ACTION_RESEARCH_BRIEF = "research_brief"
 ACTION_INBOX_CANDIDATE = "inbox_candidate"
 
 WRITE_CREATE_ONLY = "create_only"
@@ -90,6 +92,14 @@ def dispatch_for_route(
         return _candidate_plan(
             route=route,
             action=ACTION_KNOWLEDGE_CANDIDATE,
+            source_platform=source_platform,
+            source_message_id=source_message_id,
+        )
+
+    if route.route == ROUTE_RESEARCH:
+        return _candidate_plan(
+            route=route,
+            action=ACTION_RESEARCH_BRIEF,
             source_platform=source_platform,
             source_message_id=source_message_id,
         )
