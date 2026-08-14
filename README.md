@@ -57,6 +57,16 @@ Definition of done:
 Current status: first Hermes bridge deployment completed and recorded in
 `docs/08-deployment-log.md`.
 
+## Hermes Link Capture
+
+The link-capture service is being built incrementally under
+`services/link_capture`. Its first checkpoint contains normalized data models,
+strict LLM output contracts, URL/platform detection, source-integrity guards,
+and replaceable provider boundaries. See `docs/11-link-capture-mvp.md`.
+
+The original URL shared in Telegram is immutable capture data. Redirected,
+canonical, thumbnail, and media URLs are always stored separately.
+
 ## Local Verification
 
 ```bash
