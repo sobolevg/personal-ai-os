@@ -132,15 +132,15 @@ class NormalizedContent:
         """Apply trusted pipeline updates while guarding immutable identity."""
         protected = {"source_url", "saved_at"}.intersection(updates)
         if protected:
-            fields = ", ".join(sorted(protected))
+            protected_names = ", ".join(sorted(protected))
             raise SourceUrlIntegrityError(
-                f"capture identity fields cannot be updated: {fields}"
+                f"capture identity fields cannot be updated: {protected_names}"
             )
         allowed = {item.name for item in fields(self)}
         unknown = set(updates).difference(allowed)
         if unknown:
-            fields = ", ".join(sorted(unknown))
-            raise ValueError(f"unknown normalized content fields: {fields}")
+            unknown_names = ", ".join(sorted(unknown))
+            raise ValueError(f"unknown normalized content fields: {unknown_names}")
         return replace(self, **dict(updates))
 
     def to_dict(self) -> dict[str, Any]:

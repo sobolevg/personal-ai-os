@@ -37,6 +37,13 @@ Reels expose MP4 video, so a production live path needs a temporary audio
 conversion and public HTTPS object-storage URL (or the PLAUD File Upload API
 with a separate user token). Direct MP4 submission is not considered reliable.
 
+The media-preparation boundary now uses FFmpeg to remux the first audio stream
+from a provider-validated HTTPS media URL into a randomly named temporary M4A.
+It invokes FFmpeg without a shell, applies a hard timeout and output-size cap,
+removes partial files after failure, and keeps both `source_url` and `media_url`
+outside the prepared artifact model. Publishing the temporary M4A remains a
+separate replaceable boundary.
+
 No Telegram polling, LLM request, Notion write, or VPS deployment is enabled by
 this checkpoint.
 
