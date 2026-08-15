@@ -9,6 +9,8 @@
 - Added URL extraction and source-platform detection.
 - Added immutable original-source handling and provider/client boundaries.
 - Added dotenv configuration template and a foundation Docker image.
+- Added public Instagram metadata extraction with bounded HTTP retry and
+  graceful fallback.
 - Documented current Hermes local patches from the VPS runtime.
 - Added fixtures for Notion task payload generation and validation cases.
 - Added pure Notion task payload builder with fixture-backed unit tests.

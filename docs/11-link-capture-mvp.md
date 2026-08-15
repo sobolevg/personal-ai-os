@@ -14,8 +14,13 @@ This checkpoint implements only:
 - provider/client boundaries;
 - unit tests for this foundation.
 
-No Telegram polling, network metadata extraction, LLM request, Notion write,
-or VPS deployment is enabled by this checkpoint.
+The first provider checkpoint adds conservative Instagram extraction from
+metadata exposed in an unauthenticated public HTML response. It does not use
+cookies, log in, download media, or bypass access controls. Provider failures
+preserve the minimal capture.
+
+No Telegram polling, LLM request, Notion write, or VPS deployment is enabled by
+this checkpoint.
 
 ## Module Structure
 
@@ -25,7 +30,10 @@ services/link_capture/
 ├── url_detection.py
 ├── config.py
 ├── extraction/
-│   └── base.py
+│   ├── base.py
+│   ├── http.py
+│   ├── registry.py
+│   └── providers/instagram.py
 ├── classification.py
 ├── notion.py
 └── telegram.py
@@ -65,7 +73,5 @@ its representation and fails clearly when required values are missing.
 
 ## Next Checkpoint
 
-Add the generic web/YouTube metadata providers and extractor registry. Test
-fallback behavior first, including successful record creation when metadata is
-unavailable. Then add the OpenAI-compatible classifier; do not connect Telegram
-or write to Notion until those units pass.
+Add the generic web metadata provider, then the OpenAI-compatible classifier.
+Do not connect Telegram or write to Notion until those units pass.
