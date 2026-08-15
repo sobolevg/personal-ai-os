@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
+import json
 import re
 from urllib.parse import urljoin, urlsplit
 
@@ -67,6 +68,7 @@ class InstagramOpenGraphExtractor:
             response.final_url,
         )
         published_at = parser.first("article:published_time") or None
+        media_url = _extract_public_media_url(response.body)
 
         if not any((title, description, thumbnail_url)):
             raise ExtractionError("Instagram returned no public post metadata")
@@ -82,6 +84,7 @@ class InstagramOpenGraphExtractor:
             text=description,
             media_type=_media_type(parser.first("og:type"), request.source_url),
             thumbnail_url=thumbnail_url,
+            media_url=media_url,
             published_at=published_at,
         )
 
@@ -174,6 +177,36 @@ def _author_url_from_description(description: str) -> str:
     if match is None:
         return ""
     return f"https://www.instagram.com/{match.group('username')}/"
+
+
+def _extract_public_media_url(html: str) -> str | None:
+    marker = '"video_versions":'
+    position = html.find(marker)
+    if position < 0:
+        return None
+    try:
+        versions, _ = json.JSONDecoder().raw_decode(html[position + len(marker) :])
+    except (json.JSONDecodeError, TypeError):
+        return None
+    if not isinstance(versions, list):
+        return None
+    for version in versions:
+        if not isinstance(version, dict):
+            continue
+        candidate = version.get("url")
+        if isinstance(candidate, str) and _is_public_instagram_media_url(candidate):
+            return candidate
+    return None
+
+
+def _is_public_instagram_media_url(url: str) -> bool:
+    parsed = urlsplit(url)
+    hostname = (parsed.hostname or "").lower().rstrip(".")
+    return parsed.scheme.lower() == "https" and (
+        hostname.endswith(".fbcdn.net")
+        or hostname == "cdninstagram.com"
+        or hostname.endswith(".cdninstagram.com")
+    )
 
 
 def _media_type(open_graph_type: str, source_url: str) -> str:

@@ -19,6 +19,11 @@ metadata exposed in an unauthenticated public HTML response. It does not use
 cookies, log in, download media, or bypass access controls. Provider failures
 preserve the minimal capture.
 
+When Instagram includes public `video_versions`, the provider records the first
+HTTPS media reference from an allow-listed Instagram/Facebook CDN in
+`media_url`. This URL is temporary processing input, never a replacement for
+`source_url`, and must not be treated as the durable Notion source link.
+
 No Telegram polling, LLM request, Notion write, or VPS deployment is enabled by
 this checkpoint.
 
@@ -73,5 +78,6 @@ its representation and fails clearly when required values are missing.
 
 ## Next Checkpoint
 
-Add the generic web metadata provider, then the OpenAI-compatible classifier.
-Do not connect Telegram or write to Notion until those units pass.
+Add a replaceable media transcription boundary, with PLAUD Developer API and
+local Hermes Whisper as provider options. Then add the OpenAI-compatible text
+classifier. Do not connect Telegram or write to Notion until those units pass.

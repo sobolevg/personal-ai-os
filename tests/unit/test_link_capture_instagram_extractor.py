@@ -36,6 +36,11 @@ PUBLIC_HTML = """
     <meta property="og:image" content="/media/public-thumbnail.jpg">
     <meta property="og:type" content="video.other">
     <meta property="article:published_time" content="2026-08-15T10:20:30Z">
+    <script type="application/json">
+      {"video_versions":[
+        {"type":101,"url":"https://instagram.example.fbcdn.net/public-video.mp4"}
+      ]}
+    </script>
   </head>
 </html>
 """
@@ -93,7 +98,10 @@ class InstagramOpenGraphExtractorTest(unittest.IsolatedAsyncioTestCase):
             "https://www.instagram.com/media/public-thumbnail.jpg",
         )
         self.assertEqual(outcome.content.published_at, "2026-08-15T10:20:30Z")
-        self.assertIsNone(outcome.content.media_url)
+        self.assertEqual(
+            outcome.content.media_url,
+            "https://instagram.example.fbcdn.net/public-video.mp4",
+        )
 
     async def test_private_or_unavailable_page_preserves_minimal_capture(self) -> None:
         transport = StubTextTransport()
@@ -187,6 +195,30 @@ class InstagramOpenGraphExtractorTest(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(outcome.extracted)
         self.assertEqual(outcome.content.source_url, SOURCE_URL)
         self.assertIn("no public post metadata", outcome.error or "")
+
+    async def test_rejects_embedded_media_url_from_untrusted_host(self) -> None:
+        html = """
+        <meta property="og:title" content="Public Instagram post">
+        <script type="application/json">
+          {"video_versions":[{"type":101,"url":"https://evil.example/video.mp4"}]}
+        </script>
+        """
+        transport = StubTextTransport(
+            TextHttpResponse(final_url=SOURCE_URL, body=html, headers={})
+        )
+        original = NormalizedContent.captured(
+            source_url=SOURCE_URL,
+            platform=SourcePlatform.INSTAGRAM,
+            saved_at=SAVED_AT,
+        )
+
+        outcome = await ExtractorRegistry(
+            [InstagramOpenGraphExtractor(transport=transport)]
+        ).enrich(original)
+
+        self.assertTrue(outcome.extracted)
+        self.assertIsNone(outcome.content.media_url)
+        self.assertEqual(outcome.content.source_url, SOURCE_URL)
 
     async def test_provider_rejects_other_platforms(self) -> None:
         extractor = InstagramOpenGraphExtractor(transport=StubTextTransport())

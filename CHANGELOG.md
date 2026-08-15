@@ -11,6 +11,8 @@
 - Added dotenv configuration template and a foundation Docker image.
 - Added public Instagram metadata extraction with bounded HTTP retry and
   graceful fallback.
+- Added allow-listed public Instagram media references for downstream
+  transcription without replacing the original source URL.
 - Documented current Hermes local patches from the VPS runtime.
 - Added fixtures for Notion task payload generation and validation cases.
 - Added pure Notion task payload builder with fixture-backed unit tests.
