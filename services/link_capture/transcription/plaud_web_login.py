@@ -56,7 +56,15 @@ def _run(args: argparse.Namespace) -> int:
                 return 0
 
             _click_if_visible(page.get_by_role("button", name="Accept All"))
-            page.get_by_placeholder("Email address").fill(email)
+            email_input = page.get_by_placeholder("Email address")
+            if email_input.get_attribute("readonly") is not None:
+                password_mode = page.get_by_role(
+                    "button", name="Sign in with password", exact=True
+                )
+                if not _click_if_visible(password_mode):
+                    raise RuntimeError("could not reset the code sign-in form")
+                email_input.wait_for(state="visible", timeout=10_000)
+            email_input.fill(email)
             agreement = page.locator('input[type="checkbox"]')
             if agreement.count() and not agreement.first.is_checked():
                 agreement.first.check()
