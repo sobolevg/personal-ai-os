@@ -56,15 +56,15 @@ def _run(args: argparse.Namespace) -> int:
                 return 0
 
             _click_if_visible(page.get_by_role("button", name="Accept All"))
+            page.get_by_placeholder("Email address").fill(email)
+            agreement = page.locator('input[type="checkbox"]')
+            if agreement.count() and not agreement.first.is_checked():
+                agreement.first.check()
             button = page.get_by_role(
                 "button", name="Sign in with a code", exact=True
             )
             if not _click_if_visible(button):
                 raise RuntimeError("code sign-in control was not found")
-            page.get_by_placeholder("Email address").fill(email)
-            agreement = page.locator('input[type="checkbox"]')
-            if agreement.count() and not agreement.first.is_checked():
-                agreement.first.check()
             page.get_by_role("button", name="Send", exact=True).click()
             code_input = page.get_by_placeholder("Enter verification code")
             code_input.wait_for(state="visible", timeout=30_000)
