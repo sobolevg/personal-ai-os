@@ -249,6 +249,43 @@ class ContentClassification:
         return result
 
 
+@dataclass(frozen=True, slots=True)
+class TranscriptSegment:
+    """One time-aligned fragment returned by a transcription provider."""
+
+    start: float
+    end: float
+    text: str
+    speaker: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.start < 0 or self.end < self.start:
+            raise ValueError("transcript segment timestamps are invalid")
+        if not isinstance(self.text, str):
+            raise TypeError("transcript segment text must be a string")
+
+
+@dataclass(frozen=True, slots=True)
+class TranscriptResult:
+    """Provider-neutral transcript kept separate from captured metadata."""
+
+    text: str
+    language: str
+    duration_seconds: float | None
+    segments: tuple[TranscriptSegment, ...]
+    provider: str
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.text, str):
+            raise TypeError("transcript text must be a string")
+        if self.duration_seconds is not None and self.duration_seconds < 0:
+            raise ValueError("transcript duration must be non-negative")
+        if not isinstance(self.segments, tuple) or not all(
+            isinstance(segment, TranscriptSegment) for segment in self.segments
+        ):
+            raise TypeError("segments must be a tuple of TranscriptSegment values")
+
+
 def _validate_http_url(value: str, field_name: str) -> None:
     if not isinstance(value, str) or not value:
         raise ValueError(f"{field_name} must be a non-empty string")

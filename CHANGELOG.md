@@ -13,6 +13,8 @@
   graceful fallback.
 - Added allow-listed public Instagram media references for downstream
   transcription without replacing the original source URL.
+- Added a provider-neutral transcript model and bounded PLAUD Developer API
+  submit/poll adapter with credential-safe logging.
 - Documented current Hermes local patches from the VPS runtime.
 - Added fixtures for Notion task payload generation and validation cases.
 - Added pure Notion task payload builder with fixture-backed unit tests.

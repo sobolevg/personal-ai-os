@@ -24,6 +24,19 @@ HTTPS media reference from an allow-listed Instagram/Facebook CDN in
 `media_url`. This URL is temporary processing input, never a replacement for
 `source_url`, and must not be treated as the durable Notion source link.
 
+The next isolated checkpoint adds a provider-neutral transcript result and a
+PLAUD Developer API adapter. Transcripts remain separate from captions and
+captured metadata. The adapter submits a public media URL, polls boundedly,
+maps time-aligned segments, redacts credentials from representations, and does
+not log response bodies or authentication headers. Non-idempotent submit calls
+are not retried because the provider does not expose an idempotency-key contract;
+read-only polling requests use bounded retry.
+
+The PLAUD Developer API currently documents M4A, MP3, and WAV inputs. Instagram
+Reels expose MP4 video, so a production live path needs a temporary audio
+conversion and public HTTPS object-storage URL (or the PLAUD File Upload API
+with a separate user token). Direct MP4 submission is not considered reliable.
+
 No Telegram polling, LLM request, Notion write, or VPS deployment is enabled by
 this checkpoint.
 
@@ -78,6 +91,6 @@ its representation and fails clearly when required values are missing.
 
 ## Next Checkpoint
 
-Add a replaceable media transcription boundary, with PLAUD Developer API and
-local Hermes Whisper as provider options. Then add the OpenAI-compatible text
-classifier. Do not connect Telegram or write to Notion until those units pass.
+Run one live Instagram-to-PLAUD transcription through the isolated adapter,
+then add the OpenAI-compatible text classifier. Do not connect Telegram or
+write to Notion until those units pass.
