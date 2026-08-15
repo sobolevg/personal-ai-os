@@ -33,9 +33,10 @@ are not retried because the provider does not expose an idempotency-key contract
 read-only polling requests use bounded retry.
 
 The PLAUD Developer API currently documents M4A, MP3, and WAV inputs. Instagram
-Reels expose MP4 video, so a production live path needs a temporary audio
-conversion and public HTTPS object-storage URL (or the PLAUD File Upload API
-with a separate user token). Direct MP4 submission is not considered reliable.
+Reels expose MP4 video, so the adapter prepares audio separately. Live tests
+with valid credentials and public M4A, MP3, and WAV inputs all returned a PLAUD
+server error. Browser-based PLAUD Web transcription is therefore treated as a
+replaceable fallback provider, not as pipeline-owned logic.
 
 The media-preparation boundary now uses FFmpeg to remux the first audio stream
 from a provider-validated HTTPS media URL into a randomly named temporary M4A.
@@ -44,8 +45,15 @@ removes partial files after failure, and keeps both `source_url` and `media_url`
 outside the prepared artifact model. Publishing the temporary M4A remains a
 separate replaceable boundary.
 
-No Telegram polling, LLM request, Notion write, or VPS deployment is enabled by
-this checkpoint.
+The current Zettelkasten checkpoint adds a strict Russian distillation prompt
+and a Notion payload builder. The page contains only the atomic summary,
+concrete usefulness, a verification caveat, and a visible original-source
+link. Captions and raw transcripts are deliberately excluded from Notion page
+content. The `Zettelkasten Core` database schema and one Instagram example page
+were verified with a live Notion write.
+
+No Telegram polling, production LLM request, or automatic Notion write is
+enabled by this checkpoint.
 
 ## Module Structure
 
@@ -59,6 +67,12 @@ services/link_capture/
 │   ├── http.py
 │   ├── registry.py
 │   └── providers/instagram.py
+├── media/
+│   ├── base.py
+│   └── ffmpeg.py
+├── transcription/
+│   ├── base.py
+│   └── plaud.py
 ├── classification.py
 ├── notion.py
 └── telegram.py
@@ -98,6 +112,7 @@ its representation and fails clearly when required values are missing.
 
 ## Next Checkpoint
 
-Run one live Instagram-to-PLAUD transcription through the isolated adapter,
-then add the OpenAI-compatible text classifier. Do not connect Telegram or
-write to Notion until those units pass.
+Add the concrete OpenAI-compatible classifier and an isolated VPS runner that
+can choose local Whisper or PLAUD Web behind the same transcription boundary.
+Run the supplied Instagram Reel end to end on the VPS before connecting the
+Telegram handler or enabling automatic Notion writes.

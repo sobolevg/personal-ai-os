@@ -1,13 +1,14 @@
-"""Notion persistence boundary and stable property names."""
+"""Notion persistence boundary and Zettelkasten page construction."""
 
 from __future__ import annotations
 
-from typing import Protocol
+from typing import Any, Protocol
 
 from services.link_capture.models import ContentClassification, NormalizedContent
 
 
 NOTION_PROPERTY_MAP = {
+    "title": "Name",
     "source_url": "Original URL",
     "canonical_url": "Canonical URL",
     "platform": "Source",
@@ -15,6 +16,115 @@ NOTION_PROPERTY_MAP = {
     "author_url": "Author URL",
     "saved_at": "Saved At",
 }
+
+
+def build_zettelkasten_page_payload(
+    database_id: str,
+    content: NormalizedContent,
+    classification: ContentClassification,
+) -> dict[str, Any]:
+    """Build a concise Notion page without persisting source transcripts.
+
+    The LLM owns only the distilled knowledge fields. Capture identity always
+    comes from ``NormalizedContent``, so a model response cannot replace the
+    exact URL that entered Hermes.
+    """
+    if not database_id.strip():
+        raise ValueError("database_id is required")
+
+    properties: dict[str, Any] = {
+        NOTION_PROPERTY_MAP["title"]: _title(classification.title),
+        NOTION_PROPERTY_MAP["source_url"]: {"url": content.source_url},
+        NOTION_PROPERTY_MAP["platform"]: {
+            "select": {"name": content.platform.value}
+        },
+        NOTION_PROPERTY_MAP["saved_at"]: {
+            "date": {"start": content.saved_at}
+        },
+        "Type": {"select": {"name": "Permanent"}},
+    }
+    if content.canonical_url:
+        properties[NOTION_PROPERTY_MAP["canonical_url"]] = {
+            "url": content.canonical_url
+        }
+    if content.author:
+        properties[NOTION_PROPERTY_MAP["author"]] = _rich_text(content.author)
+    if content.author_url:
+        properties[NOTION_PROPERTY_MAP["author_url"]] = {
+            "url": content.author_url
+        }
+
+    return {
+        "parent": {"database_id": database_id},
+        "properties": properties,
+        "children": [
+            {
+                "object": "block",
+                "type": "paragraph",
+                "paragraph": {
+                    "rich_text": [
+                        {
+                            "type": "text",
+                            "text": {
+                                "content": "Оригинал",
+                                "link": {"url": content.source_url},
+                            },
+                        }
+                    ]
+                },
+            },
+            _heading("Суть"),
+            _paragraph(classification.summary),
+            _heading("Чем полезно"),
+            _paragraph(classification.why_relevant),
+            {
+                "object": "block",
+                "type": "callout",
+                "callout": {
+                    "icon": {"type": "emoji", "emoji": "⚠️"},
+                    "rich_text": [
+                        {
+                            "type": "text",
+                            "text": {
+                                "content": (
+                                    "Польза сформулирована по исходному материалу; "
+                                    "медицинские утверждения требуют отдельной проверки."
+                                )
+                            },
+                        }
+                    ],
+                },
+            },
+        ],
+    }
+
+
+def _title(value: str) -> dict[str, Any]:
+    return {"title": [{"type": "text", "text": {"content": value}}]}
+
+
+def _rich_text(value: str) -> dict[str, Any]:
+    return {"rich_text": [{"type": "text", "text": {"content": value}}]}
+
+
+def _heading(value: str) -> dict[str, Any]:
+    return {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+            "rich_text": [{"type": "text", "text": {"content": value}}]
+        },
+    }
+
+
+def _paragraph(value: str) -> dict[str, Any]:
+    return {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+            "rich_text": [{"type": "text", "text": {"content": value}}]
+        },
+    }
 
 
 class NotionLinkStore(Protocol):
