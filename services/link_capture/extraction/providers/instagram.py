@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
+import re
 from urllib.parse import urljoin, urlsplit
 
 from services.link_capture.extraction.base import (
@@ -16,6 +17,13 @@ from services.link_capture.extraction.http import (
     UrllibTextTransport,
 )
 from services.link_capture.models import ContentEnrichment, SourcePlatform
+
+
+_DESCRIPTION_AUTHOR_PATTERN = re.compile(
+    r"^\s*[\d.,KM]+\s+likes?,\s+[\d.,KM]+\s+comments?\s+-\s+"
+    r"(?P<username>[A-Za-z0-9._]{1,30})\s+on\s+",
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -66,7 +74,10 @@ class InstagramOpenGraphExtractor:
         return ContentEnrichment(
             canonical_url=canonical_url,
             author=_author_from_title(title),
-            author_url=_author_url(canonical_url or request.source_url),
+            author_url=(
+                _author_url(canonical_url or request.source_url)
+                or _author_url_from_description(description)
+            ),
             title=title,
             text=description,
             media_type=_media_type(parser.first("og:type"), request.source_url),
@@ -156,6 +167,13 @@ def _author_url(post_url: str) -> str:
     if len(segments) >= 3 and segments[1].lower() in {"p", "reel", "reels"}:
         return f"https://www.instagram.com/{segments[0]}/"
     return ""
+
+
+def _author_url_from_description(description: str) -> str:
+    match = _DESCRIPTION_AUTHOR_PATTERN.match(description)
+    if match is None:
+        return ""
+    return f"https://www.instagram.com/{match.group('username')}/"
 
 
 def _media_type(open_graph_type: str, source_url: str) -> str:
