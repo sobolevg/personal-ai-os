@@ -1,5 +1,50 @@
 # Deployment Log
 
+## 2026-08-16 - Instagram Zettelkasten VPS Staging
+
+Status: deployed to an isolated VPS worktree and smoke-tested. Production
+Telegram routing and automatic Notion writes remain unchanged.
+
+Commit deployed:
+
+```text
+39ba475 feat: build concise Zettelkasten pages
+```
+
+Target:
+
+```text
+VPS host: hermes
+Staging worktree: /opt/personal-ai-os-link-capture-39ba475
+Hermes service: hermes-gateway.service (not restarted)
+```
+
+Deployment:
+
+- pushed the checkpoint to GitHub branch `agent/link-capture-foundation`;
+- transferred the commit to the VPS as a git bundle because the production
+  checkout has no GitHub SSH credential;
+- created a detached, isolated worktree without modifying the production
+  checkout.
+
+Validation:
+
+- ran `python3 -m unittest discover` on the VPS: 97 tests OK;
+- used the configured Hermes OpenRouter model to distill the Instagram summary
+  into the strict classification schema;
+- built the Zettelkasten Notion payload and verified that the exact original
+  URL survived while the raw transcript did not enter page content;
+- added the required source properties to `Zettelkasten Core` and verified one
+  live Permanent-note by reading it back from Notion.
+
+Removal of this staging worktree does not require a service restart:
+
+```bash
+cd /opt/personal-ai-os
+git worktree remove /opt/personal-ai-os-link-capture-39ba475
+git branch -r -d bundle/link-capture-39ba475
+```
+
 ## 2026-07-08 - Research Agent Draft Runtime
 
 Status: deployed the second partial-runtime agent. Telegram research and
