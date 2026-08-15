@@ -84,6 +84,59 @@ class PlaudSettings:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class PlaudWebSettings:
+    """Runtime paths for the optional persistent-browser provider."""
+
+    browser_python: Path
+    profile_dir: Path
+    timeout_seconds: float = 900.0
+    headless: bool = True
+
+    @classmethod
+    def from_env(cls, env_file: str | Path | None = ".env") -> PlaudWebSettings:
+        if env_file is not None:
+            _load_dotenv(Path(env_file))
+        browser_python = Path(
+            os.environ.get(
+                "PLAUD_WEB_BROWSER_PYTHON",
+                "/opt/vfs-slot-watcher/.venv/bin/python",
+            ).strip()
+        )
+        profile_dir = Path(
+            os.environ.get(
+                "PLAUD_WEB_PROFILE_DIR",
+                "/root/.hermes/browser-profiles/plaud-web",
+            ).strip()
+        )
+        timeout_raw = os.environ.get("PLAUD_WEB_TIMEOUT_SECONDS", "900").strip()
+        headless_raw = os.environ.get("PLAUD_WEB_HEADLESS", "1").strip().lower()
+        try:
+            timeout_seconds = float(timeout_raw)
+        except ValueError as error:
+            raise MissingConfigurationError(
+                "PLAUD_WEB_TIMEOUT_SECONDS must be numeric"
+            ) from error
+        if not browser_python.is_absolute() or not profile_dir.is_absolute():
+            raise MissingConfigurationError(
+                "PLAUD Web runtime paths must be absolute"
+            )
+        if timeout_seconds <= 0:
+            raise MissingConfigurationError(
+                "PLAUD_WEB_TIMEOUT_SECONDS must be positive"
+            )
+        if headless_raw not in {"0", "1", "false", "true", "no", "yes"}:
+            raise MissingConfigurationError(
+                "PLAUD_WEB_HEADLESS must be a boolean value"
+            )
+        return cls(
+            browser_python=browser_python,
+            profile_dir=profile_dir,
+            timeout_seconds=timeout_seconds,
+            headless=headless_raw in {"1", "true", "yes"},
+        )
+
+
 def _load_dotenv(path: Path) -> None:
     """Load the small dotenv subset needed by this service, without overrides."""
     if not path.is_file():

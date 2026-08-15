@@ -38,6 +38,13 @@ with valid credentials and public M4A, MP3, and WAV inputs all returned a PLAUD
 server error. Browser-based PLAUD Web transcription is therefore treated as a
 replaceable fallback provider, not as pipeline-owned logic.
 
+The PLAUD Web provider runs Playwright in a separate interpreter so the domain
+service does not depend on browser packages. It uploads only a prepared local
+audio artifact, uses a dedicated persistent profile, serializes concurrent
+access with a lock, and returns the same `TranscriptResult` model as other
+providers. Authentication is a one-time profile bootstrap and credentials are
+never stored in git or passed to the provider process.
+
 The media-preparation boundary now uses FFmpeg to remux the first audio stream
 from a provider-validated HTTPS media URL into a randomly named temporary M4A.
 It invokes FFmpeg without a shell, applies a hard timeout and output-size cap,
@@ -72,7 +79,9 @@ services/link_capture/
 │   └── ffmpeg.py
 ├── transcription/
 │   ├── base.py
-│   └── plaud.py
+│   ├── plaud.py
+│   ├── plaud_web.py
+│   └── plaud_web_runner.py
 ├── classification.py
 ├── notion.py
 └── telegram.py
