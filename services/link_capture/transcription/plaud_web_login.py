@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import argparse
 import getpass
+import os
 from pathlib import Path
+import secrets
+import string
 import sys
 from urllib.parse import urlparse
 
@@ -12,6 +15,14 @@ from urllib.parse import urlparse
 def _arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--profile-dir", type=Path, required=True)
+    parser.add_argument(
+        "--generated-password-file",
+        type=Path,
+        help=(
+            "create a strong PLAUD password in this mode-0600 file when "
+            "code login requires the one-time password setup step"
+        ),
+    )
     parser.add_argument("--headed", action="store_true")
     return parser.parse_args()
 
@@ -31,9 +42,45 @@ def _is_auth_response(response, endpoint: str) -> bool:
 
 
 def _require_successful_response(response, operation: str) -> None:
-    if response.ok:
+    if not response.ok:
+        raise RuntimeError(
+            f"PLAUD {operation} request failed with HTTP {response.status}"
+        )
+    try:
+        payload = response.json()
+    except Exception:
         return
-    raise RuntimeError(f"PLAUD {operation} request failed with HTTP {response.status}")
+    service_status = payload.get("status") if isinstance(payload, dict) else None
+    if service_status not in (None, 0):
+        raise RuntimeError(
+            f"PLAUD {operation} request failed with status {service_status}"
+        )
+
+
+def _generate_password() -> str:
+    alphabet = string.ascii_letters + string.digits + "!@#$%"
+    required = [
+        secrets.choice(string.ascii_lowercase),
+        secrets.choice(string.ascii_uppercase),
+        secrets.choice(string.digits),
+    ]
+    password = required + [secrets.choice(alphabet) for _ in range(13)]
+    secrets.SystemRandom().shuffle(password)
+    return "".join(password)
+
+
+def _create_password_file(path: Path) -> str:
+    resolved = path.expanduser().resolve()
+    resolved.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    password = _generate_password()
+    descriptor = os.open(resolved, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+            stream.write(password + "\n")
+    except Exception:
+        resolved.unlink(missing_ok=True)
+        raise
+    return password
 
 
 def _run(args: argparse.Namespace) -> int:
@@ -142,6 +189,35 @@ def _run(args: argparse.Namespace) -> int:
             ) as login_response_info:
                 sign_in.first.click(timeout=3_000)
             _require_successful_response(login_response_info.value, "login")
+
+            set_password_form = page.get_by_test_id(
+                "login-otp-set-password-form"
+            )
+            try:
+                set_password_form.wait_for(state="visible", timeout=10_000)
+            except Exception:
+                pass
+            if set_password_form.count() and set_password_form.first.is_visible():
+                if args.generated_password_file is None:
+                    raise RuntimeError(
+                        "PLAUD requires one-time password setup; rerun with "
+                        "--generated-password-file after user approval"
+                    )
+                password = _create_password_file(args.generated_password_file)
+                page.get_by_test_id("otp-set-password-input").fill(password)
+                page.get_by_test_id("otp-set-confirm-password-input").fill(
+                    password
+                )
+                with page.expect_response(
+                    lambda response: _is_auth_response(
+                        response, "/auth/set-password-issue-token"
+                    ),
+                    timeout=30_000,
+                ) as password_response_info:
+                    page.get_by_test_id("otp-set-password-create-btn").click()
+                _require_successful_response(
+                    password_response_info.value, "password setup"
+                )
             page.wait_for_url(
                 lambda url: "/login" not in url,
                 timeout=60_000,
