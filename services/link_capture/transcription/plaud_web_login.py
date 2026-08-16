@@ -63,6 +63,20 @@ def _response_data(payload: dict) -> dict:
     return data if isinstance(data, dict) else {}
 
 
+def _ensure_policy_checked(page) -> None:
+    policy = page.get_by_test_id("policy-checkbox-agreeTerms")
+    policy.wait_for(state="visible", timeout=10_000)
+    checkbox = policy.locator('[role="checkbox"]')
+    if checkbox.get_attribute("aria-checked") != "true":
+        policy.click()
+    page.wait_for_function(
+        """() => document.querySelector(
+          '[data-testid="policy-checkbox-agreeTerms"] [role="checkbox"]'
+        )?.getAttribute('aria-checked') === 'true'""",
+        timeout=10_000,
+    )
+
+
 def _generate_password() -> str:
     alphabet = string.ascii_letters + string.digits + "!@#$%"
     required = [
@@ -139,9 +153,7 @@ def _run(args: argparse.Namespace) -> int:
                 timeout=10_000,
             )
             email_input.fill(email)
-            agreement = page.locator('input[type="checkbox"]')
-            if agreement.count() and not agreement.first.is_checked():
-                agreement.first.check()
+            _ensure_policy_checked(page)
             otp_send_responses = []
             page.on(
                 "response",
@@ -154,9 +166,7 @@ def _run(args: argparse.Namespace) -> int:
                 raise RuntimeError("code sign-in control was not found")
             code_input = page.get_by_placeholder("Enter verification code")
             code_input.wait_for(state="visible", timeout=30_000)
-            agreement = page.locator('input[type="checkbox"]')
-            if agreement.count() and not agreement.first.is_checked():
-                agreement.first.check()
+            _ensure_policy_checked(page)
 
             # The current PLAUD UI normally sends the first code automatically
             # when code mode opens. Only click Send when no request occurred,
@@ -177,9 +187,7 @@ def _run(args: argparse.Namespace) -> int:
             _require_successful_response(
                 otp_send_responses[-1], "verification-code"
             )
-            agreement = page.locator('input[type="checkbox"]')
-            if agreement.count() and not agreement.first.is_checked():
-                agreement.first.check()
+            _ensure_policy_checked(page)
             print("Verification code sent. Check your email.")
             code = getpass.getpass("Verification code: ").strip()
             if not code:
