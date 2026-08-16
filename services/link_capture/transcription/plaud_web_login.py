@@ -122,6 +122,10 @@ def _password_from_file(path: Path) -> str:
 
 def _fill_after_unlock(page, locator, value: str) -> None:
     field = locator.first
+    tag_name = field.evaluate("element => element.tagName.toLowerCase()")
+    if tag_name not in {"input", "textarea"}:
+        field = field.locator("input, textarea").first
+    field.wait_for(state="visible", timeout=10_000)
     field.click(force=True)
     for _ in range(100):
         if field.get_attribute("readonly") is None:
