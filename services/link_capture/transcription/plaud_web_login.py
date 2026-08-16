@@ -41,7 +41,7 @@ def _is_auth_response(response, endpoint: str) -> bool:
     return urlparse(response.url).path.endswith(endpoint)
 
 
-def _require_successful_response(response, operation: str) -> None:
+def _require_successful_response(response, operation: str) -> dict:
     if not response.ok:
         raise RuntimeError(
             f"PLAUD {operation} request failed with HTTP {response.status}"
@@ -49,12 +49,18 @@ def _require_successful_response(response, operation: str) -> None:
     try:
         payload = response.json()
     except Exception:
-        return
+        return {}
     service_status = payload.get("status") if isinstance(payload, dict) else None
     if service_status not in (None, 0):
         raise RuntimeError(
             f"PLAUD {operation} request failed with status {service_status}"
         )
+    return payload if isinstance(payload, dict) else {}
+
+
+def _response_data(payload: dict) -> dict:
+    data = payload.get("data", payload)
+    return data if isinstance(data, dict) else {}
 
 
 def _generate_password() -> str:
@@ -188,13 +194,17 @@ def _run(args: argparse.Namespace) -> int:
                 timeout=30_000,
             ) as login_response_info:
                 sign_in.first.click(timeout=3_000)
-            _require_successful_response(login_response_info.value, "login")
+            login_payload = _require_successful_response(
+                login_response_info.value, "login"
+            )
+            login_data = _response_data(login_payload)
+            expected_password_setup = bool(login_data.get("set_password_token"))
 
             set_password_form = page.get_by_test_id(
                 "login-otp-set-password-form"
             )
             try:
-                set_password_form.wait_for(state="visible", timeout=10_000)
+                set_password_form.wait_for(state="visible", timeout=30_000)
             except Exception:
                 pass
             if set_password_form.count() and set_password_form.first.is_visible():
@@ -217,6 +227,24 @@ def _run(args: argparse.Namespace) -> int:
                     page.get_by_test_id("otp-set-password-create-btn").click()
                 _require_successful_response(
                     password_response_info.value, "password setup"
+                )
+            elif expected_password_setup:
+                raise RuntimeError(
+                    "PLAUD requested password setup but its form did not appear"
+                )
+            elif "/login" in page.url:
+                code_error = page.locator("#login-code-error")
+                if code_error.count() and code_error.first.is_visible():
+                    message = code_error.first.inner_text().strip()
+                    if message:
+                        raise RuntimeError(f"PLAUD rejected the code: {message}")
+                result_kind = (
+                    "access token"
+                    if login_data.get("access_token")
+                    else "no recognized login result"
+                )
+                raise RuntimeError(
+                    f"PLAUD stayed on the login page after returning {result_kind}"
                 )
             page.wait_for_url(
                 lambda url: "/login" not in url,
