@@ -5,8 +5,8 @@ from __future__ import annotations
 import argparse
 import getpass
 from pathlib import Path
-import re
 import sys
+from urllib.parse import urlparse
 
 
 def _arguments() -> argparse.Namespace:
@@ -24,6 +24,16 @@ def _click_if_visible(locator) -> bool:
     except Exception:
         return False
     return False
+
+
+def _is_auth_response(response, endpoint: str) -> bool:
+    return urlparse(response.url).path.endswith(endpoint)
+
+
+def _require_successful_response(response, operation: str) -> None:
+    if response.ok:
+        return
+    raise RuntimeError(f"PLAUD {operation} request failed with HTTP {response.status}")
 
 
 def _run(args: argparse.Namespace) -> int:
@@ -56,35 +66,82 @@ def _run(args: argparse.Namespace) -> int:
                 return 0
 
             _click_if_visible(page.get_by_role("button", name="Accept All"))
-            email_input = page.get_by_placeholder("Email address")
-            if email_input.get_attribute("readonly") is not None:
+            existing_code = page.get_by_placeholder("Enter verification code")
+            if existing_code.count() and existing_code.first.is_visible():
                 password_mode = page.get_by_role(
                     "button", name="Sign in with password", exact=True
                 )
                 if not _click_if_visible(password_mode):
                     raise RuntimeError("could not reset the code sign-in form")
-                email_input.wait_for(state="visible", timeout=10_000)
+                existing_code.first.wait_for(state="hidden", timeout=10_000)
+            email_input = page.get_by_placeholder("Email address")
+            email_input.click(force=True)
+            page.wait_for_function(
+                """() => {
+                  const input = document.querySelector(
+                    'input[placeholder="Email address"]'
+                  );
+                  return input && !input.hasAttribute('readonly');
+                }""",
+                timeout=10_000,
+            )
             email_input.fill(email)
             agreement = page.locator('input[type="checkbox"]')
             if agreement.count() and not agreement.first.is_checked():
                 agreement.first.check()
-            button = page.get_by_role(
-                "button", name="Sign in with a code", exact=True
+            otp_send_responses = []
+            page.on(
+                "response",
+                lambda response: otp_send_responses.append(response)
+                if _is_auth_response(response, "/auth/otp-send-code")
+                else None,
             )
+            button = page.get_by_test_id("login-toggle-method-button")
             if not _click_if_visible(button):
                 raise RuntimeError("code sign-in control was not found")
-            page.get_by_role("button", name="Send", exact=True).click()
             code_input = page.get_by_placeholder("Enter verification code")
             code_input.wait_for(state="visible", timeout=30_000)
+            agreement = page.locator('input[type="checkbox"]')
+            if agreement.count() and not agreement.first.is_checked():
+                agreement.first.check()
+
+            # The current PLAUD UI normally sends the first code automatically
+            # when code mode opens. Only click Send when no request occurred,
+            # otherwise the first code can be invalidated by a duplicate send.
+            page.wait_for_timeout(5_000)
+            if not otp_send_responses:
+                send = page.get_by_role("button", name="Send", exact=True)
+                if not send.is_enabled():
+                    raise RuntimeError("verification-code request is not enabled")
+                with page.expect_response(
+                    lambda response: _is_auth_response(
+                        response, "/auth/otp-send-code"
+                    ),
+                    timeout=30_000,
+                ) as send_response_info:
+                    send.click()
+                otp_send_responses.append(send_response_info.value)
+            _require_successful_response(
+                otp_send_responses[-1], "verification-code"
+            )
+            agreement = page.locator('input[type="checkbox"]')
+            if agreement.count() and not agreement.first.is_checked():
+                agreement.first.check()
             print("Verification code sent. Check your email.")
             code = getpass.getpass("Verification code: ").strip()
             if not code:
                 raise ValueError("verification code is required")
+            code_input.click(force=True)
             code_input.fill(code)
-            sign_in = page.get_by_role(
-                "button", name=re.compile(r"^Sign in\s*$")
-            )
-            sign_in.click()
+            sign_in = page.get_by_test_id("login-login-btn")
+            if not sign_in.count() or not sign_in.first.is_visible():
+                raise RuntimeError("code sign-in submission was not found")
+            with page.expect_response(
+                lambda response: _is_auth_response(response, "/auth/otp-login"),
+                timeout=30_000,
+            ) as login_response_info:
+                sign_in.first.click(timeout=3_000)
+            _require_successful_response(login_response_info.value, "login")
             page.wait_for_url(
                 lambda url: "/login" not in url,
                 timeout=60_000,
