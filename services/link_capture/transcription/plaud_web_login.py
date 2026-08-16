@@ -199,6 +199,11 @@ def _run(args: argparse.Namespace) -> int:
             )
             login_data = _response_data(login_payload)
             expected_password_setup = bool(login_data.get("set_password_token"))
+            print(
+                "PLAUD OTP response received "
+                f"(password_setup={str(expected_password_setup).lower()}, "
+                f"access_granted={str(bool(login_data.get('access_token'))).lower()})."
+            )
 
             set_password_form = page.get_by_test_id(
                 "login-otp-set-password-form"
@@ -208,6 +213,7 @@ def _run(args: argparse.Namespace) -> int:
             except Exception:
                 pass
             if set_password_form.count() and set_password_form.first.is_visible():
+                print("PLAUD password setup form detected.")
                 if args.generated_password_file is None:
                     raise RuntimeError(
                         "PLAUD requires one-time password setup; rerun with "
@@ -224,6 +230,7 @@ def _run(args: argparse.Namespace) -> int:
                     ),
                     timeout=30_000,
                 ) as password_response_info:
+                    print("Submitting PLAUD password setup.")
                     page.get_by_test_id("otp-set-password-create-btn").click()
                 _require_successful_response(
                     password_response_info.value, "password setup"
@@ -263,7 +270,10 @@ def main() -> int:
     try:
         return _run(_arguments())
     except Exception as error:
-        print(f"Login failed: {type(error).__name__}", file=sys.stderr)
+        if isinstance(error, RuntimeError):
+            print(f"Login failed: {error}", file=sys.stderr)
+        else:
+            print(f"Login failed: {type(error).__name__}", file=sys.stderr)
         return 2
 
 
