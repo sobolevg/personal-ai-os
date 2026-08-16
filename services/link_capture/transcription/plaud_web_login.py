@@ -103,6 +103,34 @@ def _create_password_file(path: Path) -> str:
     return password
 
 
+def _password_from_file(path: Path) -> str:
+    resolved = path.expanduser().resolve()
+    if not resolved.exists():
+        return _create_password_file(resolved)
+    password = resolved.read_text(encoding="utf-8").strip()
+    if not (
+        8 <= len(password) <= 16
+        and any(character.islower() for character in password)
+        and any(character.isupper() for character in password)
+        and any(character.isdigit() for character in password)
+    ):
+        raise RuntimeError("stored PLAUD password does not meet requirements")
+    if resolved.stat().st_mode & 0o077:
+        raise RuntimeError("stored PLAUD password file permissions are too broad")
+    return password
+
+
+def _fill_after_unlock(page, locator, value: str) -> None:
+    field = locator.first
+    field.click(force=True)
+    for _ in range(100):
+        if field.get_attribute("readonly") is None:
+            field.fill(value)
+            return
+        page.wait_for_timeout(100)
+    raise RuntimeError("PLAUD input remained locked by anti-autofill")
+
+
 def _run(args: argparse.Namespace) -> int:
     from playwright.sync_api import sync_playwright
 
@@ -227,10 +255,16 @@ def _run(args: argparse.Namespace) -> int:
                         "PLAUD requires one-time password setup; rerun with "
                         "--generated-password-file after user approval"
                     )
-                password = _create_password_file(args.generated_password_file)
-                page.get_by_test_id("otp-set-password-input").fill(password)
-                page.get_by_test_id("otp-set-confirm-password-input").fill(
-                    password
+                password = _password_from_file(args.generated_password_file)
+                _fill_after_unlock(
+                    page,
+                    page.get_by_test_id("otp-set-password-input"),
+                    password,
+                )
+                _fill_after_unlock(
+                    page,
+                    page.get_by_test_id("otp-set-confirm-password-input"),
+                    password,
                 )
                 with page.expect_response(
                     lambda response: _is_auth_response(

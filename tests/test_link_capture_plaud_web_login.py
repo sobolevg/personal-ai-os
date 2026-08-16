@@ -6,6 +6,7 @@ import unittest
 from services.link_capture.transcription.plaud_web_login import (
     _create_password_file,
     _generate_password,
+    _password_from_file,
 )
 
 
@@ -27,6 +28,8 @@ class PlaudWebLoginTests(unittest.TestCase):
             self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o600)
             with self.assertRaises(FileExistsError):
                 _create_password_file(path)
+
+            self.assertEqual(_password_from_file(path), password)
 
 
 if __name__ == "__main__":
