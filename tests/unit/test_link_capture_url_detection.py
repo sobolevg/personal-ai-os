@@ -43,6 +43,14 @@ class UrlExtractionTest(unittest.TestCase):
         self.assertEqual(extract_urls(None), ())
         self.assertEqual(extract_urls("No link here"), ())
 
+    def test_markdown_link_does_not_merge_label_and_target(self) -> None:
+        source_url = "https://www.instagram.com/reel/ABC/?igsh=exact"
+
+        self.assertEqual(
+            extract_urls(f"[{source_url}]({source_url})"),
+            (source_url, source_url),
+        )
+
 
 class PlatformDetectionTest(unittest.TestCase):
     def test_detects_supported_platforms(self) -> None:

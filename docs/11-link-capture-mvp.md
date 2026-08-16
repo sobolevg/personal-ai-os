@@ -59,14 +59,30 @@ link. Captions and raw transcripts are deliberately excluded from Notion page
 content. The `Zettelkasten Core` database schema and one Instagram example page
 were verified with a live Notion write.
 
-No Telegram polling, production LLM request, or automatic Notion write is
-enabled by this checkpoint.
+The Hermes-native checkpoint adds two tools instead of a second LLM client:
+
+- `personal_ai_os_link_prepare` preserves capture identity, enriches the
+  Instagram URL, prepares audio, and returns the PLAUD transcript;
+- the active Hermes model distills that result using the installed link-capture
+  skill;
+- `personal_ai_os_link_save` validates the strict classification and writes the
+  Notion page from server-owned capture state.
+
+The save tool deliberately has no `source_url` parameter. Retries use a stable
+`capture_id`, and the exact source URL and first `saved_at` value are loaded
+from mode-0600 state on the VPS. The transcript is removed from that state
+after a successful Notion write.
+
+Telegram exposure and automatic Notion writes remain separately gated by
+deployment configuration until the runtime smoke test is approved.
 
 ## Module Structure
 
 ```text
 services/link_capture/
 ├── models.py
+├── capture_state.py
+├── workflow.py
 ├── url_detection.py
 ├── config.py
 ├── extraction/
@@ -105,12 +121,13 @@ record.
 ## Planned Pipeline
 
 ```text
-Telegram message
+Telegram message handled by Hermes
   -> exact URL capture + platform detection
   -> provider registry + metadata extraction
   -> normalized content
-  -> OpenAI-compatible structured classification
-  -> Notion persistence
+  -> PLAUD Web transcript
+  -> active Hermes model creates strict structured classification
+  -> server-owned source identity + Notion persistence
   -> Telegram confirmation
 ```
 
@@ -122,7 +139,7 @@ its representation and fails clearly when required values are missing.
 
 ## Next Checkpoint
 
-Add the concrete OpenAI-compatible classifier and an isolated VPS runner that
-can choose local Whisper or PLAUD Web behind the same transcription boundary.
-Run the supplied Instagram Reel end to end on the VPS before connecting the
-Telegram handler or enabling automatic Notion writes.
+Install the Hermes bridge and skill on the VPS with writes disabled, verify the
+two tool schemas in the Telegram toolset, then enable one live Instagram capture
+with `PERSONAL_AI_OS_LINK_CAPTURE_EXECUTE_ENABLED=1` and monitor the resulting
+Notion page and Telegram confirmation.

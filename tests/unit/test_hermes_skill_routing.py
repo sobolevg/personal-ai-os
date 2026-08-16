@@ -16,6 +16,14 @@ PERSONAL_AI_OS_CAPTURE_SKILL = (
     / "personal-ai-os-capture"
     / "SKILL.md"
 )
+PERSONAL_AI_OS_LINK_CAPTURE_SKILL = (
+    REPO_ROOT
+    / "hermes"
+    / "skills"
+    / "productivity"
+    / "personal-ai-os-link-capture"
+    / "SKILL.md"
+)
 
 
 class HermesSkillRoutingTest(unittest.TestCase):
@@ -39,6 +47,14 @@ class HermesSkillRoutingTest(unittest.TestCase):
         self.assertIn("Knowledge Curator", skill_text)
         self.assertIn("Research Agent", skill_text)
         self.assertIn("Do not use `session_search`", skill_text)
+
+    def test_link_skill_requires_hermes_model_between_prepare_and_save(self) -> None:
+        skill_text = PERSONAL_AI_OS_LINK_CAPTURE_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn("personal_ai_os_link_prepare", skill_text)
+        self.assertIn("personal_ai_os_link_save", skill_text)
+        self.assertIn("active Hermes model", skill_text)
+        self.assertIn("Never pass `source_url`", skill_text)
 
 
 if __name__ == "__main__":

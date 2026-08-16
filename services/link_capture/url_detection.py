@@ -19,7 +19,7 @@ class DetectedUrl:
     platform: SourcePlatform
 
 
-_URL_PATTERN = re.compile(r"https?://[^\s<>\"']+", re.IGNORECASE)
+_URL_PATTERN = re.compile(r"https?://[^\s<>\"'\]]+", re.IGNORECASE)
 _SIMPLE_TRAILING_PUNCTUATION = ".,!?;:"
 _CLOSING_DELIMITERS = {")": "(", "]": "[", "}": "{"}
 

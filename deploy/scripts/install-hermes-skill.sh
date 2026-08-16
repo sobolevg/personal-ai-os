@@ -42,6 +42,18 @@ verify_source() {
     echo "Missing required file: $SOURCE_DIR/SKILL.md" >&2
     exit 1
   fi
+  if [[ "$SKILL_NAME" == "personal-ai-os-link-capture" ]]; then
+    grep -q "personal_ai_os_link_prepare" "$SOURCE_DIR/SKILL.md" || {
+      echo "Link skill does not mention personal_ai_os_link_prepare" >&2
+      exit 1
+    }
+    grep -q "personal_ai_os_link_save" "$SOURCE_DIR/SKILL.md" || {
+      echo "Link skill does not mention personal_ai_os_link_save" >&2
+      exit 1
+    }
+    echo "OK: source skill routes link capture through Hermes"
+    return
+  fi
   if [[ "$SKILL_NAME" == "notion-tasks" ]] && ! grep -q "notion_task_create" "$SOURCE_DIR/SKILL.md"; then
     echo "Skill does not mention notion_task_create: $SOURCE_DIR/SKILL.md" >&2
     exit 1
@@ -58,6 +70,12 @@ verify_installed() {
   if [[ ! -f "$TARGET_DIR/SKILL.md" ]]; then
     echo "Missing installed skill file: $TARGET_DIR/SKILL.md" >&2
     exit 1
+  fi
+  if [[ "$SKILL_NAME" == "personal-ai-os-link-capture" ]]; then
+    grep -q "personal_ai_os_link_prepare" "$TARGET_DIR/SKILL.md" || exit 1
+    grep -q "personal_ai_os_link_save" "$TARGET_DIR/SKILL.md" || exit 1
+    echo "OK: installed skill routes link capture through Hermes"
+    return
   fi
   if [[ "$SKILL_NAME" == "notion-tasks" ]] && ! grep -q "notion_task_create" "$TARGET_DIR/SKILL.md"; then
     echo "Installed skill does not mention notion_task_create: $TARGET_DIR/SKILL.md" >&2
