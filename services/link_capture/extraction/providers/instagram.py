@@ -25,6 +25,15 @@ _DESCRIPTION_AUTHOR_PATTERN = re.compile(
     r"(?P<username>[A-Za-z0-9._]{1,30})\s+on\s+",
     re.IGNORECASE,
 )
+_DESCRIPTION_CAPTION_PATTERN = re.compile(
+    r"^\s*[\d.,KM]+\s+likes?,\s+[\d.,KM]+\s+comments?\s+-\s+"
+    r"[A-Za-z0-9._]{1,30}\s+on\s+[^:]+:\s*(?P<caption>.*)\s*$",
+    re.IGNORECASE | re.DOTALL,
+)
+_TITLE_CAPTION_PATTERN = re.compile(
+    r"^\s*.+?\s+on\s+Instagram:\s*(?P<caption>.*)\s*$",
+    re.IGNORECASE | re.DOTALL,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,6 +68,7 @@ class InstagramOpenGraphExtractor:
             "twitter:description",
             "description",
         )
+        caption = _instagram_caption(description, title)
         thumbnail_url = _absolute_url(
             parser.first("og:image", "twitter:image"),
             response.final_url,
@@ -81,7 +91,7 @@ class InstagramOpenGraphExtractor:
                 or _author_url_from_description(description)
             ),
             title=title,
-            text=description,
+            text=caption,
             media_type=_media_type(parser.first("og:type"), request.source_url),
             thumbnail_url=thumbnail_url,
             media_url=media_url,
@@ -177,6 +187,28 @@ def _author_url_from_description(description: str) -> str:
     if match is None:
         return ""
     return f"https://www.instagram.com/{match.group('username')}/"
+
+
+def _instagram_caption(description: str, title: str) -> str:
+    """Remove Instagram's engagement/date wrapper while preserving author text."""
+    description_match = _DESCRIPTION_CAPTION_PATTERN.match(description)
+    if description_match is not None:
+        return _unwrap_caption(description_match.group("caption"))
+
+    title_match = _TITLE_CAPTION_PATTERN.match(title)
+    if title_match is not None:
+        return _unwrap_caption(title_match.group("caption"))
+
+    return description.strip()
+
+
+def _unwrap_caption(value: str) -> str:
+    caption = value.strip()
+    if len(caption) >= 3 and caption[0] == '"' and caption.endswith('".'):
+        return caption[1:-2].strip()
+    if len(caption) >= 2 and caption[0] in {'"', "'"} and caption[-1] == caption[0]:
+        return caption[1:-1].strip()
+    return caption
 
 
 def _extract_public_media_url(html: str) -> str | None:

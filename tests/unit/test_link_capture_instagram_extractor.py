@@ -150,6 +150,30 @@ class InstagramOpenGraphExtractorTest(unittest.IsolatedAsyncioTestCase):
             outcome.content.author_url,
             "https://www.instagram.com/yurlov.move/",
         )
+        self.assertEqual(outcome.content.text, "caption")
+        self.assertEqual(outcome.content.source_url, source_url)
+
+    async def test_extracts_caption_from_title_when_description_is_missing(self) -> None:
+        source_url = "https://www.instagram.com/reel/ABC123/?igsh=shared"
+        html = """
+        <meta property="og:title"
+              content='Display Name on Instagram: "Полезное описание автора"'>
+        """
+        transport = StubTextTransport(
+            TextHttpResponse(final_url=source_url, body=html, headers={})
+        )
+        original = NormalizedContent.captured(
+            source_url=source_url,
+            platform=SourcePlatform.INSTAGRAM,
+            saved_at=SAVED_AT,
+        )
+
+        outcome = await ExtractorRegistry(
+            [InstagramOpenGraphExtractor(transport=transport)]
+        ).enrich(original)
+
+        self.assertTrue(outcome.extracted)
+        self.assertEqual(outcome.content.text, "Полезное описание автора")
         self.assertEqual(outcome.content.source_url, source_url)
 
     async def test_login_redirect_is_not_treated_as_post_metadata(self) -> None:

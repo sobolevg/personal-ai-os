@@ -7,8 +7,10 @@ captured, summarized, remembered, or saved to Notion.
 
 1. Call `personal_ai_os_link_prepare` with the raw Telegram message and the
    stable Telegram message id from platform context.
-2. Read the returned metadata and transcript yourself. Do not call a separate
-   LLM service: the active Hermes model must do the distillation.
+2. Read both returned `text` (the Instagram author's caption) and `transcript`
+   yourself. Treat the caption as primary source context, not as social-media
+   noise. Do not call a separate LLM service: the active Hermes model must do
+   the distillation.
 3. Select one durable idea only. Ignore greetings, repetitions, advertising,
    calls to subscribe, and generic social-media framing.
 4. Call `personal_ai_os_link_save` with the returned `capture_id` and the
@@ -33,7 +35,8 @@ Write in Russian:
 - `reusable_knowledge`: true only when the idea remains useful beyond the post
 
 Do not include a transcript, long retelling, promotional CTA, or extra facts in
-the Notion fields. Do not present medical claims as verified facts; use
+the distilled Notion fields. The save tool preserves the author's caption in a
+separate collapsed `Описание автора` block. Do not present medical claims as verified facts; use
 "автор утверждает" or "может" where appropriate.
 
 ## Source Integrity

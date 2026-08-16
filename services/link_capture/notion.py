@@ -23,7 +23,7 @@ def build_zettelkasten_page_payload(
     content: NormalizedContent,
     classification: ContentClassification,
 ) -> dict[str, Any]:
-    """Build a concise Notion page without persisting source transcripts.
+    """Build a concise note with source caption but without raw transcription.
 
     The LLM owns only the distilled knowledge fields. Capture identity always
     comes from ``NormalizedContent``, so a model response cannot replace the
@@ -54,48 +54,54 @@ def build_zettelkasten_page_payload(
             "url": content.author_url
         }
 
+    children = [
+        {
+            "object": "block",
+            "type": "paragraph",
+            "paragraph": {
+                "rich_text": [
+                    {
+                        "type": "text",
+                        "text": {
+                            "content": "Оригинал",
+                            "link": {"url": content.source_url},
+                        },
+                    }
+                ]
+            },
+        },
+        _heading("Суть"),
+        _paragraph(classification.summary),
+        _heading("Чем полезно"),
+        _paragraph(classification.why_relevant),
+    ]
+    if content.text.strip():
+        children.append(_source_text_toggle(content.text))
+    children.append(
+        {
+            "object": "block",
+            "type": "callout",
+            "callout": {
+                "icon": {"type": "emoji", "emoji": "⚠️"},
+                "rich_text": [
+                    {
+                        "type": "text",
+                        "text": {
+                            "content": (
+                                "Польза сформулирована по исходному материалу; "
+                                "медицинские утверждения требуют отдельной проверки."
+                            )
+                        },
+                    }
+                ],
+            },
+        }
+    )
+
     return {
         "parent": {"database_id": database_id},
         "properties": properties,
-        "children": [
-            {
-                "object": "block",
-                "type": "paragraph",
-                "paragraph": {
-                    "rich_text": [
-                        {
-                            "type": "text",
-                            "text": {
-                                "content": "Оригинал",
-                                "link": {"url": content.source_url},
-                            },
-                        }
-                    ]
-                },
-            },
-            _heading("Суть"),
-            _paragraph(classification.summary),
-            _heading("Чем полезно"),
-            _paragraph(classification.why_relevant),
-            {
-                "object": "block",
-                "type": "callout",
-                "callout": {
-                    "icon": {"type": "emoji", "emoji": "⚠️"},
-                    "rich_text": [
-                        {
-                            "type": "text",
-                            "text": {
-                                "content": (
-                                    "Польза сформулирована по исходному материалу; "
-                                    "медицинские утверждения требуют отдельной проверки."
-                                )
-                            },
-                        }
-                    ],
-                },
-            },
-        ],
+        "children": children,
     }
 
 
@@ -125,6 +131,27 @@ def _paragraph(value: str) -> dict[str, Any]:
             "rich_text": [{"type": "text", "text": {"content": value}}]
         },
     }
+
+
+def _source_text_toggle(value: str) -> dict[str, Any]:
+    return {
+        "object": "block",
+        "type": "toggle",
+        "toggle": {
+            "rich_text": [
+                {"type": "text", "text": {"content": "Описание автора"}}
+            ],
+            "children": [_paragraph(chunk) for chunk in _rich_text_chunks(value)],
+        },
+    }
+
+
+def _rich_text_chunks(value: str, limit: int = 1900) -> list[str]:
+    """Split source text below Notion's per-rich-text content limit."""
+    text = value.strip()
+    if not text:
+        return []
+    return [text[start : start + limit] for start in range(0, len(text), limit)]
 
 
 class NotionLinkStore(Protocol):

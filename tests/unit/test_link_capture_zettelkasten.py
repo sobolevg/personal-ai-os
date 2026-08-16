@@ -48,8 +48,8 @@ def reverse_step_up_classification() -> ContentClassification:
 
 
 class ZettelkastenNotionPayloadTest(unittest.TestCase):
-    def test_page_contains_only_distilled_idea_and_visible_original_link(self) -> None:
-        raw_transcript = "RAW TRANSCRIPT MUST NEVER ENTER NOTION " * 20
+    def test_page_contains_distilled_idea_caption_and_original_link(self) -> None:
+        author_caption = "Описание автора о пользе упражнения " * 20
         content = NormalizedContent.captured(
             SOURCE_URL,
             SourcePlatform.INSTAGRAM,
@@ -59,7 +59,7 @@ class ZettelkastenNotionPayloadTest(unittest.TestCase):
                 canonical_url=CANONICAL_URL,
                 author="Дима Юрлов | фитнес-тренер",
                 author_url="https://www.instagram.com/yurlov.move/",
-                text=raw_transcript,
+                text=author_caption,
                 media_url="https://cdninstagram.example/video.mp4",
             )
         )
@@ -71,7 +71,8 @@ class ZettelkastenNotionPayloadTest(unittest.TestCase):
         )
         serialized = json.dumps(payload, ensure_ascii=False)
 
-        self.assertNotIn("RAW TRANSCRIPT", serialized)
+        self.assertIn("Описание автора о пользе упражнения", serialized)
+        self.assertIn('"type": "toggle"', serialized)
         self.assertNotIn("cdninstagram.example", serialized)
         self.assertEqual(
             payload["properties"]["Original URL"]["url"], SOURCE_URL
@@ -87,6 +88,29 @@ class ZettelkastenNotionPayloadTest(unittest.TestCase):
         )
         self.assertIn("Reverse Step-Up", serialized)
         self.assertIn("Чем полезно", serialized)
+
+    def test_long_caption_is_split_below_notion_rich_text_limit(self) -> None:
+        content = NormalizedContent.captured(
+            SOURCE_URL,
+            SourcePlatform.INSTAGRAM,
+            saved_at="2026-08-16T09:00:00Z",
+        ).enrich(ContentEnrichment(text="x" * 4100))
+
+        payload = build_zettelkasten_page_payload(
+            "zettelkasten-database-id",
+            content,
+            reverse_step_up_classification(),
+        )
+        toggle = next(
+            block for block in payload["children"] if block["type"] == "toggle"
+        )
+        chunks = [
+            block["paragraph"]["rich_text"][0]["text"]["content"]
+            for block in toggle["toggle"]["children"]
+        ]
+
+        self.assertEqual("".join(chunks), "x" * 4100)
+        self.assertTrue(all(len(chunk) <= 1900 for chunk in chunks))
 
     def test_page_survives_when_extraction_has_no_metadata(self) -> None:
         content = NormalizedContent.captured(
@@ -106,6 +130,9 @@ class ZettelkastenNotionPayloadTest(unittest.TestCase):
         )
         self.assertNotIn("Canonical URL", payload["properties"])
         self.assertNotIn("Author", payload["properties"])
+        self.assertFalse(
+            any(block["type"] == "toggle" for block in payload["children"])
+        )
 
     def test_database_id_is_required(self) -> None:
         content = NormalizedContent.captured(
