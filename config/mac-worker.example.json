@@ -1,0 +1,12 @@
+{
+  "projects": {
+    "personal-ai-os": "/Users/your-user/Projects/personal-ai-os"
+  },
+  "allow_roots": [
+    "/Users/your-user/Projects"
+  ],
+  "jobs_dir": "/Users/your-user/Library/Application Support/personal-ai-os-mac-worker/jobs",
+  "codex_binary": "/Applications/ChatGPT.app/Contents/Resources/codex",
+  "claude_binary": "/opt/homebrew/bin/claude",
+  "max_task_chars": 20000
+}

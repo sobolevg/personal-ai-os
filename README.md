@@ -67,6 +67,14 @@ and replaceable provider boundaries. See `docs/11-link-capture-mvp.md`.
 The original URL shared in Telegram is immutable capture data. Redirected,
 canonical, thumbnail, and media URLs are always stored separately.
 
+## Restricted Mac Worker
+
+Hermes can delegate background tasks to Codex or Claude Code on an allowlisted
+Mac project through a Tailscale-addressed, forced-command SSH endpoint. The
+model receives `run`, `status`, `stop`, and `doctor` tools rather than a general
+shell. See `docs/12-mac-worker-delegation.md` for the threat model, staging flow,
+production gate, and rollback.
+
 ## Local Verification
 
 ```bash

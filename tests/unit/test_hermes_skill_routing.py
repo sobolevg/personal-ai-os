@@ -24,6 +24,9 @@ PERSONAL_AI_OS_LINK_CAPTURE_SKILL = (
     / "personal-ai-os-link-capture"
     / "SKILL.md"
 )
+MAC_WORKER_SKILL = (
+    REPO_ROOT / "hermes" / "skills" / "productivity" / "mac-worker" / "SKILL.md"
+)
 
 
 class HermesSkillRoutingTest(unittest.TestCase):
@@ -55,6 +58,16 @@ class HermesSkillRoutingTest(unittest.TestCase):
         self.assertIn("personal_ai_os_link_save", skill_text)
         self.assertIn("active Hermes model", skill_text)
         self.assertIn("Never pass `source_url`", skill_text)
+
+    def test_mac_worker_skill_routes_natural_language_and_explicit_commands(self) -> None:
+        skill_text = MAC_WORKER_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn("передай Codex на моём Mac", skill_text)
+        self.assertIn("mac run codex", skill_text)
+        self.assertIn("mac_worker_run", skill_text)
+        self.assertIn("mac_worker_status", skill_text)
+        self.assertIn("mac_worker_stop", skill_text)
+        self.assertIn("Do not use `terminal`, `execute_code`", skill_text)
 
 
 if __name__ == "__main__":

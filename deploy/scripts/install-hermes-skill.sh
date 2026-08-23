@@ -54,6 +54,13 @@ verify_source() {
     echo "OK: source skill routes link capture through Hermes"
     return
   fi
+  if [[ "$SKILL_NAME" == "mac-worker" ]]; then
+    grep -q "mac_worker_run" "$SOURCE_DIR/SKILL.md" || exit 1
+    grep -q "mac_worker_status" "$SOURCE_DIR/SKILL.md" || exit 1
+    grep -q "mac_worker_stop" "$SOURCE_DIR/SKILL.md" || exit 1
+    echo "OK: source skill routes restricted Mac worker delegation"
+    return
+  fi
   if [[ "$SKILL_NAME" == "notion-tasks" ]] && ! grep -q "notion_task_create" "$SOURCE_DIR/SKILL.md"; then
     echo "Skill does not mention notion_task_create: $SOURCE_DIR/SKILL.md" >&2
     exit 1
@@ -75,6 +82,13 @@ verify_installed() {
     grep -q "personal_ai_os_link_prepare" "$TARGET_DIR/SKILL.md" || exit 1
     grep -q "personal_ai_os_link_save" "$TARGET_DIR/SKILL.md" || exit 1
     echo "OK: installed skill routes link capture through Hermes"
+    return
+  fi
+  if [[ "$SKILL_NAME" == "mac-worker" ]]; then
+    grep -q "mac_worker_run" "$TARGET_DIR/SKILL.md" || exit 1
+    grep -q "mac_worker_status" "$TARGET_DIR/SKILL.md" || exit 1
+    grep -q "mac_worker_stop" "$TARGET_DIR/SKILL.md" || exit 1
+    echo "OK: installed skill routes restricted Mac worker delegation"
     return
   fi
   if [[ "$SKILL_NAME" == "notion-tasks" ]] && ! grep -q "notion_task_create" "$TARGET_DIR/SKILL.md"; then
