@@ -1,5 +1,51 @@
 # Deployment Log
 
+## 2026-08-23 - Restricted Mac Worker VPS Staging
+
+Status: deployed to an isolated VPS worktree and validated. Production Hermes
+toolsets, Telegram routing, systemd configuration, and the existing
+Instagram/PLAUD/Zettelkasten/Notion pipeline remain unchanged.
+
+Commit deployed:
+
+```text
+1332d562 feat: add restricted Hermes Mac worker
+```
+
+Target:
+
+```text
+VPS host: hermes
+Staging worktree: /opt/personal-ai-os-mac-worker-1332d56
+Hermes service: hermes-gateway.service (not restarted)
+```
+
+Validation:
+
+- ran `python3 -m unittest discover` on the VPS: 139 tests OK;
+- verified the OS-owned Mac worker Hermes bridge imports against the production
+  Hermes runtime;
+- verified the `mac-worker` skill routing overlay;
+- confirmed `hermes-gateway.service` remained active;
+- confirmed no `mac_worker` toolset was installed or enabled in production.
+
+Production enablement is blocked by the intentional live connectivity gate:
+
+- the VPS is online in Tailscale;
+- the Mac worker and dedicated forced-command public key are prepared;
+- the Mac does not yet have Tailscale installed/logged in;
+- macOS Remote Login is still off;
+- Codex is installed and authenticated; Claude Code is installed but not
+  authenticated.
+
+Removal of this staging worktree does not require a service restart:
+
+```bash
+cd /opt/personal-ai-os
+git worktree remove /opt/personal-ai-os-mac-worker-1332d56
+git branch -r -d bundle/mac-worker-1332d56
+```
+
 ## 2026-08-16 - Instagram Zettelkasten VPS Staging
 
 Status: deployed to an isolated VPS worktree and smoke-tested. Production

@@ -1,8 +1,9 @@
 # Safe Hermes to Mac Worker Delegation
 
 Date: 2026-08-23
-Status: implementation and local validation complete; production enablement is
-blocked until this Mac joins the VPS tailnet and Remote Login is enabled.
+Status: implementation, local validation, and isolated VPS staging complete;
+production enablement is blocked until this Mac joins the VPS tailnet and
+Remote Login is enabled.
 
 ## Architecture
 
